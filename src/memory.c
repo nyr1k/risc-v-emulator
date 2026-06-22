@@ -32,3 +32,22 @@ uint32_t read_word(uint32_t address)
     
     return word;
 }
+
+void write_word(uint32_t address, uint32_t data) 
+{
+    switch (check_address(address)) {
+        case INVALID_ADDRESS:
+            report_and_abort(INVALID_WRITE_ADDRESS);
+            break;
+        case RAM_ADDRESS:
+            uint32_t true_address = address - BASE_ADDRESS; 
+            ram.memory[true_address] = (uint8_t)(data & 0x000000FF);
+            ram.memory[true_address+1] = (uint8_t)((data & 0x0000FF00) >> 8);
+            ram.memory[true_address+2] = (uint8_t)((data & 0x00FF0000) >> 16);
+            ram.memory[true_address+3   ] = (uint8_t)((data & 0xFF000000) >> 24);
+
+            break;
+        default:
+            break;
+    }
+}
