@@ -2,12 +2,16 @@
 #define CPU_H
 
 #include <stdint.h>
+#include <misc.h>
 
 typedef struct {
   uint32_t regs[32];
   uint32_t pc;    
 } cpu_t;
 
-cpu_t cpu = {0};  
+void cpu_init();
+
+Instruction fetch();
+Decoded_instruction decode(Instruction instr); 
 
 #endif
