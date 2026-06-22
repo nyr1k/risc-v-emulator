@@ -7,7 +7,7 @@ TARGET_BUILD = rv32i
 all: $(wildcard $(SRC_DIR)/*.c)
 	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $(TARGET_BUILD) $(SRC_DIR)/*.c 
-	@printf "\nRunning...\n\n"
+	@printf "\n[OK] Running...\n\n"
 	@./$(TARGET_BUILD) 
 
 clean:
