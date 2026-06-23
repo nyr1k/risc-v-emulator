@@ -15,4 +15,11 @@ typedef struct {
     int32_t imm; 
 } Decoded_instruction;    
 
+/* bits = the number of bits the original value required */
+static inline int32_t sign_extend(uint32_t value, int bits) 
+{
+    uint32_t mask = 1U << (bits-1); // isolate the sign bit
+    return (value ^ mask) - mask; 
+}
+
 #endif
