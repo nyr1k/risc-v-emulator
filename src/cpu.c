@@ -3,8 +3,10 @@
 
 #include <cpu.h>
 #include <memory.h>
+#include <decoders.h>
 #include <err.h>
 #include <misc.h>
+#include <sys/types.h>
 
 cpu_t cpu;
 
@@ -66,65 +68,59 @@ Decoded_instruction decode(const Instruction instr)
     return decoded_instr;
 }
 
-void r_decode(Decoded_instruction *decoded_instr, const Instruction instr) 
+
+
+void execute(const Decoded_instruction decoded_instr)
 {
-    decoded_instr->rd     = (instr >> 7) & 0x1F;  // 5 bits
-    decoded_instr->funct3 = (instr >> 12) & 0x07; // 3 bits
-    decoded_instr->rs1    = (instr >> 15) & 0x1F; // 5 bits
-    decoded_instr->rs2    = (instr >> 20) & 0x1F; // 5 bits
-    decoded_instr->funct7 = (instr >> 25) & 0x7F; // 7 bits
-}
+    uint32_t next_pc = cpu.pc + 4;
+    switch (decoded_instr.opcode) {
+        /* R-type */
+        case 0x33:
+            switch (decoded_instr.funct3) {
 
-void i_decode(Decoded_instruction *decoded_instr, const Instruction instr)
-{
-    decoded_instr->rd     = (instr >> 7) & 0x1F;  // 5 bits
-    decoded_instr->funct3 = (instr >> 12) & 0x07; // 3 bits
-    decoded_instr->rs1    = (instr >> 15) & 0x1F; // 5 bits
-    decoded_instr->imm    = sign_extend((instr >> 20), 12); // 12 bits
-}
+                case 0x0:
+                    if (decoded_instr.funct7 == 0x00) 
+                        cpu.regs[decoded_instr.rd] = cpu.regs[decoded_instr.rs1] + cpu.regs[decoded_instr.rs2];
+                    else if (decoded_instr.funct7 == 0x20)
+                        cpu.regs[decoded_instr.rd] = cpu.regs[decoded_instr.rs1] - cpu.regs[decoded_instr.rs2];
+                    else
+                        report_and_abort(INVALID_INSTRUCTION);
+                    break;
+                case 0x4:
+                    cpu.regs[decoded_instr.rd] = cpu.regs[decoded_instr.rs1] ^ cpu.regs[decoded_instr.rs2];
+                    break;
+                case 0x6:
+                    cpu.regs[decoded_instr.rd] = cpu.regs[decoded_instr.rs1] | cpu.regs[decoded_instr.rs2];
+                    break;
+                case 0x7:
+                    cpu.regs[decoded_instr.rd] = cpu.regs[decoded_instr.rs1] & cpu.regs[decoded_instr.rs2];
+                    break;
+                case 0x1:
+                    cpu.regs[decoded_instr.rd] = cpu.regs[decoded_instr.rs1] << (cpu.regs[decoded_instr.rs2] & 0x1F); // riscV uses only the lowest 5 bits to shift 
+                    break;
+                case 0x5:
+                    if (decoded_instr.funct7 == 0x00)
+                        cpu.regs[decoded_instr.rd] = cpu.regs[decoded_instr.rs1] >> (cpu.regs[decoded_instr.rs2] & 0x1F); // riscV uses only the lowest 5 bits to shift 
+                    else if (decoded_instr.funct7 == 0x20)
+                        cpu.regs[decoded_instr.rd] = shift_right_arith(cpu.regs[decoded_instr.rs1], (cpu.regs[decoded_instr.rs2] & 0x1F)); // riscV uses only the lowest 5 bits to shift 
+                    else
+                        report_and_abort(INVALID_INSTRUCTION);
+                    break;
+                case 0x2:
+                    cpu.regs[decoded_instr.rd] = (int32_t)cpu.regs[decoded_instr.rs1] < (int32_t)cpu.regs[decoded_instr.rs2] ? 1 : 0;
+                    break;
+                case 0x3:
+                    cpu.regs[decoded_instr.rd] = cpu.regs[decoded_instr.rs1] < cpu.regs[decoded_instr.rs2] ? 1 : 0;
+                    break;  
+                default:
+                report_and_abort(INVALID_INSTRUCTION);
+            }
+            break;
+            
+        default:
+            report_and_abort(INVALID_INSTRUCTION);
+    }
 
-void s_decode(Decoded_instruction *decoded_instr, const Instruction instr)
-{
-    decoded_instr->funct3 = (instr >> 12) & 0x07; // 3 bits
-    decoded_instr->rs1    = (instr >> 15) & 0x1F; // 5 bits
-    decoded_instr->rs2    = (instr >> 20) & 0x1F; // 5 bits
-
-    uint32_t imm = ((instr >> 25) & 0x7F) << 5 | 
-                   ((instr >> 7) & 0x1F);
-    
-    decoded_instr->imm = sign_extend(imm, 12); // 12 bits
-}
-
-void u_decode(Decoded_instruction *decoded_instr, const Instruction instr)
-{
-    decoded_instr->rd     = (instr >> 7) & 0x1F;  // 5 bits
-    decoded_instr->imm    = (instr & 0xFFFFF000); // 20 bits
-}
-
-void b_decode(Decoded_instruction *decoded_instr, const Instruction instr) 
-{
-    decoded_instr->funct3 = (instr >> 12) & 0x07; // 3 bits
-    decoded_instr->rs1    = (instr >> 15) & 0x1F; // 5 bits
-    decoded_instr->rs2    = (instr >> 20) & 0x1F; // 5 bits
-
-    uint32_t imm = ((instr >> 31) & 0x1)   << 12 | // bit 12
-                   ((instr >> 7)  & 0x1)   << 11 | // bit 11
-                   ((instr >> 25) & 0x3F)  << 5 |  // bits 10-5 
-                   ((instr >> 8)  & 0xF)   << 1;   // bits 4-1 
-                                                   // bit 0 = 0
-
-    decoded_instr->imm = (sign_extend(imm, 13) << 1);
-}                   
-
-void j_decode(Decoded_instruction *decoded_instr, const Instruction instr)
-{
-    decoded_instr->rd     = (instr >> 7) & 0x1F;  // 5 bits
-
-    uint32_t imm = ((instr >> 31)  & 0x1)     << 20 | // bit 20
-                   ((instr >> 12)  & 0xFF)    << 12 | // bit 19-12
-                   ((instr >> 20)  & 0x1)     << 11 | // bits 11 
-                   ((instr >> 21)  & 0x3FF)   << 1;   // bits 10-1 
-                                                   // bit 0 = 0
-
-    decoded_instr->imm = (sign_extend(imm, 21) << 1 );
+    cpu.regs[0] = 0; // x0 should always be zero
+    cpu.pc = next_pc;
 }
