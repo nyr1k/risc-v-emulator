@@ -76,9 +76,18 @@ void execute(const Decoded_instruction decoded_instr)
 {
     uint32_t next_pc = cpu.pc + 4;
     switch (decoded_instr.opcode) {
+        
         /* R-type */
         case 0x33:
             r_type(&cpu, decoded_instr);
+            break;
+
+        /* I-type */
+        case 0x03: 
+        case 0x13: 
+        case 0x67:
+        case 0x73: 
+            i_type(&cpu, decoded_instr);
             break;
 
         default:
