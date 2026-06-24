@@ -12,14 +12,7 @@ typedef struct {
 void cpu_init();
 
 Instruction fetch();
-
 Decoded_instruction decode(const Instruction instr);
-
-void r_decode(Decoded_instruction *decoded_instr, const Instruction instr); 
-void i_decode(Decoded_instruction *decoded_instr, const Instruction instr); 
-void s_decode(Decoded_instruction *decoded_instr, const Instruction instr); 
-void u_decode(Decoded_instruction *decoded_instr, const Instruction instr); 
-void b_decode(Decoded_instruction *decoded_instr, const Instruction instr);
-void j_decode(Decoded_instruction *decoded_instr, const Instruction instr);
+void execute(const Decoded_instruction decoded_instr);
 
 #endif
