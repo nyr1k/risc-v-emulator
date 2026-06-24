@@ -15,4 +15,7 @@ Instruction fetch();
 Decoded_instruction decode(const Instruction instr);
 void execute(const Decoded_instruction decoded_instr);
 
+/* For debugging */
+void dump_cpu();
+
 #endif
