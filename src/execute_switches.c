@@ -1,4 +1,7 @@
-#include "misc.h"
+#include <stdint.h>
+
+#include <memory.h>
+#include <misc.h>
 #include <execute_switches.h>
 #include <err.h>
 
@@ -6,7 +9,7 @@ void r_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
 {
     switch (decoded_instr.funct3) {
 
-        case 0x0:
+        case 0x0: 
             if (decoded_instr.funct7 == 0x00) 
                 cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] + cpu->regs[decoded_instr.rs2];
             else if (decoded_instr.funct7 == 0x20)
@@ -45,15 +48,12 @@ void r_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
     }
 }
 
-
-/* TODO: refactor funct7 extraction (make it more readable)
-         check the shifting instructions - whether they operate okay 
-*/
 void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
 {
     switch (decoded_instr.opcode) {
         
-        case 0x13:
+        case 0x13: {
+            uint32_t funct7 = (decoded_instr.imm >> 5) & 0x7F;
             switch (decoded_instr.funct3) {
 
                 case 0x0:
@@ -69,15 +69,15 @@ void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
                     cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] & decoded_instr.imm;
                     break;
                 case 0x1:
-                    if (((decoded_instr.imm >> 5) & 0x3F) == 0x00)
+                    if (funct7 == 0x00)
                         cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] << (decoded_instr.imm & 0x1F);
                     else 
                         report_and_abort(INVALID_INSTRUCTION);
                     break;
                 case 0x5:
-                    if (((decoded_instr.imm >> 5) & 0x3F) == 0x00)
+                    if (funct7 == 0x00)
                         cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] >> (decoded_instr.imm & 0x1F);
-                    else if (((decoded_instr.imm >> 5) & 0x3F) == 0x20)
+                    else if (funct7 == 0x20)
                         cpu->regs[decoded_instr.rd] = shift_right_arith(cpu->regs[decoded_instr.rs1], decoded_instr.imm & 0x1F);
                     else
                         report_and_abort(INVALID_INSTRUCTION);
@@ -88,7 +88,43 @@ void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
                 case 0x3:
                     cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] < decoded_instr.imm ? 1 : 0;
                     break;
+                default:
+                    report_and_abort(INVALID_INSTRUCTION);
             }
             break;
+        }
+
+/*
+        TODO: read_half_word(), read_byte() 
+        check alignment
+*/
+
+        case 0x03: {
+            uint32_t target_address = cpu->regs[decoded_instr.rs1] + decoded_instr.imm;
+            uint32_t value = read_word(target_address);
+            switch (decoded_instr.funct3) {
+                 
+                case 0x0:
+                    cpu->regs[decoded_instr.rd] = sign_extend((value & 0xFF), 8);
+                    break;
+                case 0x1:
+                    cpu->regs[decoded_instr.rd] = sign_extend((value & 0xFFFF), 16);
+                    break;
+                case 0x2:
+                    cpu->regs[decoded_instr.rd] = (value & 0xFFFFFFFF);
+                    break;
+                case 0x4:
+                    cpu->regs[decoded_instr.rd] = (value & 0xFF);
+                    break;
+                case 0x5:
+                    cpu->regs[decoded_instr.rd] = (value & 0xFFFF);
+                    break;
+                default:
+                report_and_abort((INVALID_INSTRUCTION));
+            }
+            break;
+        }
+        default:
+            report_and_abort(INVALID_INSTRUCTION);
     } 
 }
