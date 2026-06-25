@@ -8,7 +8,8 @@ typedef enum {
     INVALID_MEMORY_ACCESS,
     INVALID_READ_ADDRESS,
     INVALID_WRITE_ADDRESS,
-    INVALID_INSTRUCTION
+    INVALID_INSTRUCTION,
+    INVALID_LOAD_ALIGNMENT
 } err_code;
 
 static const char* error_sentence = "[ERR] Aborting the program:";
@@ -33,6 +34,11 @@ static void report_and_abort(err_code error)
 
         case INVALID_INSTRUCTION:
             printf("%s INVALID_INSTRUCTION (%d)\n\n", error_sentence, INVALID_INSTRUCTION);
+            abort();
+            break;
+
+        case INVALID_LOAD_ALIGNMENT:
+            printf("%s INVALID_LOAD_ALIGNMENT (%d)\n\n", error_sentence, INVALID_LOAD_ALIGNMENT);
             abort();
             break;
 
