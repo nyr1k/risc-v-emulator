@@ -24,4 +24,10 @@ void memory_init();
 uint32_t read_word(uint32_t address);
 void write_word(uint32_t address, uint32_t data);
 
+uint16_t read_halfword(uint32_t address);
+void write_halfword(uint32_t address, uint16_t data);
+
+uint8_t read_byte(uint32_t address);
+void write_byte(uint32_t address, uint8_t data);
+
 #endif 
