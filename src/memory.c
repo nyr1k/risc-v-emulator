@@ -10,6 +10,7 @@ static inline int check_address(const uint32_t address)
     if (address >= BASE_ADDRESS && address < BASE_ADDRESS+MEMORY_SIZE) return RAM_ADDRESS;
     else if (address == MMIO_BASE) return MMIO_ADDRESS;
     else report_and_abort(INVALID_MEMORY_ACCESS);
+    return 0;
 }
 
 void memory_init() 
