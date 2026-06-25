@@ -12,7 +12,7 @@ typedef struct {
     uint32_t rs1;
     uint32_t rs2;
     uint32_t funct7;
-    int32_t imm; 
+    uint32_t imm; 
 } Decoded_instruction;    
 
 /* bits = the number of bits the original value required */
