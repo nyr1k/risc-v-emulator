@@ -4,6 +4,7 @@
 #include <misc.h>
 #include <execute_switches.h>
 #include <err.h>
+#include <sys/types.h>
 
 void r_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
 {
@@ -17,18 +18,23 @@ void r_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
             else
                 report_and_abort(INVALID_INSTRUCTION);
             break;
+
         case 0x4:
             cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] ^ cpu->regs[decoded_instr.rs2];
             break;
+
         case 0x6:
             cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] | cpu->regs[decoded_instr.rs2];
             break;
+
         case 0x7:
             cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] & cpu->regs[decoded_instr.rs2];
             break;
+
         case 0x1:
             cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] << (cpu->regs[decoded_instr.rs2] & 0x1F); // riscV uses only the lowest 5 bits to shift 
             break;
+
         case 0x5:
             if (decoded_instr.funct7 == 0x00)
                 cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] >> (cpu->regs[decoded_instr.rs2] & 0x1F); // riscV uses only the lowest 5 bits to shift 
@@ -37,12 +43,15 @@ void r_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
             else
                 report_and_abort(INVALID_INSTRUCTION);
             break;
+
         case 0x2:
             cpu->regs[decoded_instr.rd] = (int32_t)cpu->regs[decoded_instr.rs1] < (int32_t)cpu->regs[decoded_instr.rs2] ? 1 : 0;
             break;
+
         case 0x3:
             cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] < cpu->regs[decoded_instr.rs2] ? 1 : 0;
             break;  
+            
         default:
             report_and_abort(INVALID_INSTRUCTION);
     }
@@ -59,21 +68,26 @@ void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
                 case 0x0:
                     cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] + decoded_instr.imm;
                     break;
+
                 case 0x4:
                     cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] ^ decoded_instr.imm;
                     break;
+
                 case 0x6:
                     cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] | decoded_instr.imm;
                     break;
+
                 case 0x7:
                     cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] & decoded_instr.imm;
                     break;
+
                 case 0x1:
                     if (funct7 == 0x00)
                         cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] << (decoded_instr.imm & 0x1F);
                     else 
                         report_and_abort(INVALID_INSTRUCTION);
                     break;
+
                 case 0x5:
                     if (funct7 == 0x00)
                         cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] >> (decoded_instr.imm & 0x1F);
@@ -82,12 +96,15 @@ void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
                     else
                         report_and_abort(INVALID_INSTRUCTION);
                     break;
+
                 case 0x2:
                     cpu->regs[decoded_instr.rd] = (int32_t)cpu->regs[decoded_instr.rs1] < (int32_t)decoded_instr.imm ? 1 : 0;
                     break;
+
                 case 0x3:
                     cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] < decoded_instr.imm ? 1 : 0;
                     break;
+
                 default:
                     report_and_abort(INVALID_INSTRUCTION);
             }
@@ -130,11 +147,37 @@ void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
                     break;
                 }
                 default:
-                    report_and_abort((INVALID_INSTRUCTION));
+                    report_and_abort(INVALID_INSTRUCTION);
             }
             break;
         }
         default:
             report_and_abort(INVALID_INSTRUCTION);
     } 
+}
+
+void s_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
+{
+    uint32_t target_address = cpu->regs[decoded_instr.rs1] + decoded_instr.imm;
+    switch (decoded_instr.funct3) {
+
+        case 0x0:
+            write_byte(target_address, cpu->regs[decoded_instr.rs2] & 0xFF);
+            break;
+
+        case 0x1:
+            if (target_address % 2 != 0)
+                report_and_abort(INVALID_STORE_ALIGNMENT);
+            write_halfword(target_address, cpu->regs[decoded_instr.rs2] & 0xFFFF);
+            break;
+
+        case 0x2:
+            if (target_address % 4 != 0)
+                report_and_abort(INVALID_STORE_ALIGNMENT);
+            write_word(target_address, cpu->regs[decoded_instr.rs2]);
+            break;
+
+        default:
+            report_and_abort(INVALID_INSTRUCTION);
+    }
 }
