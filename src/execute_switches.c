@@ -94,33 +94,43 @@ void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
             break;
         }
 
-/*
-        TODO: read_half_word(), read_byte() 
-        check alignment
-*/
-
         case 0x03: {
             uint32_t target_address = cpu->regs[decoded_instr.rs1] + decoded_instr.imm;
-            uint32_t value = read_word(target_address);
             switch (decoded_instr.funct3) {
                  
-                case 0x0:
-                    cpu->regs[decoded_instr.rd] = sign_extend((value & 0xFF), 8);
+                case 0x0: {
+                    uint8_t value = read_byte(target_address);
+                    cpu->regs[decoded_instr.rd] = sign_extend(value, 8);
                     break;
-                case 0x1:
-                    cpu->regs[decoded_instr.rd] = sign_extend((value & 0xFFFF), 16);
+                }
+                case 0x1: {
+                    if (target_address % 2 != 0)
+                        report_and_abort(INVALID_LOAD_ALIGNMENT);
+                    uint16_t value = read_halfword(target_address);
+                    cpu->regs[decoded_instr.rd] = sign_extend(value, 16);
                     break;
-                case 0x2:
-                    cpu->regs[decoded_instr.rd] = (value & 0xFFFFFFFF);
+                }
+                case 0x2: {
+                    if (target_address % 4 != 0)
+                        report_and_abort(INVALID_LOAD_ALIGNMENT);
+                    uint32_t value = read_word(target_address);
+                    cpu->regs[decoded_instr.rd] = value;
                     break;
-                case 0x4:
-                    cpu->regs[decoded_instr.rd] = (value & 0xFF);
+                }
+                case 0x4: {
+                    uint8_t value = read_byte(target_address);
+                    cpu->regs[decoded_instr.rd] = value;
                     break;
-                case 0x5:
-                    cpu->regs[decoded_instr.rd] = (value & 0xFFFF);
+                }
+                case 0x5: {
+                    if (target_address % 2 != 0)
+                        report_and_abort(INVALID_LOAD_ALIGNMENT);
+                    uint16_t value = read_halfword(target_address);
+                    cpu->regs[decoded_instr.rd] = value;
                     break;
+                }
                 default:
-                report_and_abort((INVALID_INSTRUCTION));
+                    report_and_abort((INVALID_INSTRUCTION));
             }
             break;
         }
