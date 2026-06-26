@@ -13,9 +13,8 @@ cpu_t cpu;
 void cpu_init()
 {
     memset(cpu.regs, 0, sizeof(cpu.regs));
-    cpu.pc = BASE_ADDRESS;
-    cpu.regs[1] = 0xFFFFFFFF;
-    cpu.regs[2] = 1;
+    cpu.pc = BASE_ADDRESS+12;
+    cpu.regs[1] = BASE_ADDRESS;   // -100;
 }
 
 Instruction fetch() 
@@ -76,7 +75,7 @@ void execute(const Decoded_instruction decoded_instr)
 {
     uint32_t next_pc = cpu.pc + 4;
     switch (decoded_instr.opcode) {
-        
+
         /* R-type */
         case 0x33:
             r_type(&cpu, decoded_instr);
@@ -87,7 +86,28 @@ void execute(const Decoded_instruction decoded_instr)
         case 0x13: 
         case 0x67:
         case 0x73: 
-            i_type(&cpu, decoded_instr);
+            i_type(&cpu, decoded_instr, &next_pc);
+            break;
+
+        /* S-type */
+        case 0x23: 
+            s_type(&cpu, decoded_instr);
+            break;
+
+        /* U-type */
+        case 0x17: 
+        case 0x37: 
+            u_type(&cpu, decoded_instr);
+            break;
+
+        /* B-type */
+        case 0x63:
+            b_type(&cpu, decoded_instr, &next_pc);
+            break;
+
+        /* J-type */
+        case 0x6F:
+            j_type(&cpu, decoded_instr, &next_pc);
             break;
 
         default:
