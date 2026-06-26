@@ -50,7 +50,7 @@ void b_decode(Decoded_instruction *decoded_instr, const Instruction instr)
                    ((instr >> 8)  & 0xF)   << 1;   // bits 4-1 
                                                    // bit 0 = 0
 
-    decoded_instr->imm = (sign_extend(imm, 13) << 1);
+    decoded_instr->imm = sign_extend(imm, 13);
 }                   
 
 void j_decode(Decoded_instruction *decoded_instr, const Instruction instr)
@@ -63,5 +63,5 @@ void j_decode(Decoded_instruction *decoded_instr, const Instruction instr)
                    ((instr >> 21)  & 0x3FF)   << 1;   // bits 10-1 
                                                    // bit 0 = 0
 
-    decoded_instr->imm = (sign_extend(imm, 21) << 1 );
+    decoded_instr->imm = sign_extend(imm, 21);
 }
