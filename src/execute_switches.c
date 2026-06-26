@@ -1,9 +1,8 @@
-#include <stdint.h>
-
 #include <memory.h>
 #include <misc.h>
 #include <execute_switches.h>
 #include <err.h>
+#include <stdint.h>
 #include <sys/types.h>
 
 void r_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
@@ -51,13 +50,13 @@ void r_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
         case 0x3:
             cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] < cpu->regs[decoded_instr.rs2] ? 1 : 0;
             break;  
-            
+
         default:
             report_and_abort(INVALID_INSTRUCTION);
     }
 }
 
-void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
+void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_pc)
 {
     switch (decoded_instr.opcode) {
         
@@ -151,6 +150,14 @@ void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
             }
             break;
         }
+
+        case 0x67:
+            cpu->regs[decoded_instr.rd] = *next_pc;
+            *next_pc = (cpu->regs[decoded_instr.rs1] + decoded_instr.imm) & ~1; // because the immediate is not shifted by 1 bit, we clear the lowest bit manually
+            if ((*next_pc & 0x3) != 0) // Target address should 4-byte aligned
+                report_and_abort(INVALID_INSTRUCTION_ALIGNMENT);
+            break;
+
         default:
             report_and_abort(INVALID_INSTRUCTION);
     } 
@@ -180,4 +187,71 @@ void s_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
         default:
             report_and_abort(INVALID_INSTRUCTION);
     }
+}
+
+void u_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
+{
+    switch (decoded_instr.opcode) {
+    
+        case 0x37:
+            cpu->regs[decoded_instr.rd] = decoded_instr.imm;
+            break;
+        
+        case 0x17:
+            cpu->regs[decoded_instr.rd] = cpu->pc + decoded_instr.imm;
+            break;
+
+        default:
+            report_and_abort(INVALID_INSTRUCTION);
+    }
+}
+
+void b_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_pc)
+{
+    switch (decoded_instr.funct3) {
+        
+        case 0x0:
+            if (cpu->regs[decoded_instr.rs1] == cpu->regs[decoded_instr.rs2])
+                *next_pc = cpu->pc + decoded_instr.imm;
+            break;
+
+        case 0x1:
+            if (cpu->regs[decoded_instr.rs1] != cpu->regs[decoded_instr.rs2])
+                *next_pc = cpu->pc + decoded_instr.imm;
+            break;
+
+        case 0x4:
+            if ((int32_t)cpu->regs[decoded_instr.rs1] < (int32_t)cpu->regs[decoded_instr.rs2])
+                *next_pc = cpu->pc + decoded_instr.imm;
+            break;
+
+        case 0x5:
+            if ((int32_t)cpu->regs[decoded_instr.rs1] >= (int32_t)cpu->regs[decoded_instr.rs2])
+                *next_pc = cpu->pc + decoded_instr.imm;
+            break;
+
+        case 0x6:
+            if (cpu->regs[decoded_instr.rs1] < cpu->regs[decoded_instr.rs2])
+                *next_pc = cpu->pc + decoded_instr.imm;
+            break;
+
+        case 0x7:
+            if (cpu->regs[decoded_instr.rs1] >= cpu->regs[decoded_instr.rs2])
+                *next_pc = cpu->pc + decoded_instr.imm;
+            break;
+
+        default:
+            report_and_abort(INVALID_INSTRUCTION);
+    }
+
+    if ((*next_pc & 0x3) != 0) // Target address should be 4-byte aligned 
+        report_and_abort(INVALID_INSTRUCTION_ALIGNMENT);
+}
+
+void j_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_pc)
+{
+    cpu->regs[decoded_instr.rd] = *next_pc;
+    *next_pc = cpu->pc + decoded_instr.imm;
+    if ((*next_pc & 0x3) != 0) // Target address should 4-byte aligned
+        report_and_abort(INVALID_INSTRUCTION_ALIGNMENT);
 }
