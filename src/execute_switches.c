@@ -1,9 +1,8 @@
-#include <memory.h>
 #include <misc.h>
 #include <execute_switches.h>
 #include <err.h>
 #include <stdint.h>
-#include <sys/types.h>
+
 
 void r_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
 {
@@ -56,7 +55,7 @@ void r_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
     }
 }
 
-void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_pc)
+void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_pc, ram_t ram)
 {
     switch (decoded_instr.opcode) {
         
@@ -115,33 +114,33 @@ void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_
             switch (decoded_instr.funct3) {
                  
                 case 0x0: {
-                    uint8_t value = read_byte(target_address);
+                    uint8_t value = read_byte(ram, target_address);
                     cpu->regs[decoded_instr.rd] = sign_extend(value, 8);
                     break;
                 }
                 case 0x1: {
                     if (target_address % 2 != 0)
                         report_and_abort(INVALID_LOAD_ALIGNMENT);
-                    uint16_t value = read_halfword(target_address);
+                    uint16_t value = read_halfword(ram, target_address);
                     cpu->regs[decoded_instr.rd] = sign_extend(value, 16);
                     break;
                 }
                 case 0x2: {
                     if (target_address % 4 != 0)
                         report_and_abort(INVALID_LOAD_ALIGNMENT);
-                    uint32_t value = read_word(target_address);
+                    uint32_t value = read_word(ram, target_address);
                     cpu->regs[decoded_instr.rd] = value;
                     break;
                 }
                 case 0x4: {
-                    uint8_t value = read_byte(target_address);
+                    uint8_t value = read_byte(ram, target_address);
                     cpu->regs[decoded_instr.rd] = value;
                     break;
                 }
                 case 0x5: {
                     if (target_address % 2 != 0)
                         report_and_abort(INVALID_LOAD_ALIGNMENT);
-                    uint16_t value = read_halfword(target_address);
+                    uint16_t value = read_halfword(ram, target_address);
                     cpu->regs[decoded_instr.rd] = value;
                     break;
                 }
@@ -163,25 +162,25 @@ void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_
     } 
 }
 
-void s_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
+void s_type(cpu_t *cpu, const Decoded_instruction decoded_instr, ram_t *ram)
 {
     uint32_t target_address = cpu->regs[decoded_instr.rs1] + decoded_instr.imm;
     switch (decoded_instr.funct3) {
 
         case 0x0:
-            write_byte(target_address, cpu->regs[decoded_instr.rs2] & 0xFF);
+            write_byte(ram, target_address, cpu->regs[decoded_instr.rs2] & 0xFF);
             break;
 
         case 0x1:
             if (target_address % 2 != 0)
                 report_and_abort(INVALID_STORE_ALIGNMENT);
-            write_halfword(target_address, cpu->regs[decoded_instr.rs2] & 0xFFFF);
+            write_halfword(ram, target_address, cpu->regs[decoded_instr.rs2] & 0xFFFF);
             break;
 
         case 0x2:
             if (target_address % 4 != 0)
                 report_and_abort(INVALID_STORE_ALIGNMENT);
-            write_word(target_address, cpu->regs[decoded_instr.rs2]);
+            write_word(ram, target_address, cpu->regs[decoded_instr.rs2]);
             break;
 
         default:

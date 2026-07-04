@@ -2,24 +2,20 @@
 #include <string.h>
 
 #include <cpu.h>
-#include <memory.h>
 #include <decoders.h>
 #include <execute_switches.h>
 #include <err.h>
 #include <sys/types.h>
 
-cpu_t cpu;
-
-void cpu_init()
+void cpu_init(cpu_t *cpu)
 {
-    memset(cpu.regs, 0, sizeof(cpu.regs));
-    cpu.pc = BASE_ADDRESS+12;
-    cpu.regs[1] = BASE_ADDRESS;   // -100;
+    memset(cpu->regs, 0, sizeof(cpu->regs));
+    cpu->pc = BASE_ADDRESS;
 }
 
-Instruction fetch() 
+Instruction fetch(ram_t ram, cpu_t cpu) 
 {
-    return (Instruction)(read_word(cpu.pc));
+    return (Instruction)(read_word(ram, cpu.pc));
 }
 
 Decoded_instruction decode(const Instruction instr)
@@ -71,14 +67,14 @@ Decoded_instruction decode(const Instruction instr)
 
 
 
-void execute(const Decoded_instruction decoded_instr)
+void execute(cpu_t *cpu, const Decoded_instruction decoded_instr, ram_t *ram)
 {
-    uint32_t next_pc = cpu.pc + 4;
+    uint32_t next_pc = cpu->pc + 4;
     switch (decoded_instr.opcode) {
 
         /* R-type */
         case 0x33:
-            r_type(&cpu, decoded_instr);
+            r_type(cpu, decoded_instr);
             break;
 
         /* I-type */
@@ -86,39 +82,39 @@ void execute(const Decoded_instruction decoded_instr)
         case 0x13: 
         case 0x67:
         case 0x73: 
-            i_type(&cpu, decoded_instr, &next_pc);
+            i_type(cpu, decoded_instr, &next_pc, *ram);
             break;
 
         /* S-type */
         case 0x23: 
-            s_type(&cpu, decoded_instr);
+            s_type(cpu, decoded_instr, ram);
             break;
 
         /* U-type */
         case 0x17: 
         case 0x37: 
-            u_type(&cpu, decoded_instr);
+            u_type(cpu, decoded_instr);
             break;
 
         /* B-type */
         case 0x63:
-            b_type(&cpu, decoded_instr, &next_pc);
+            b_type(cpu, decoded_instr, &next_pc);
             break;
 
         /* J-type */
         case 0x6F:
-            j_type(&cpu, decoded_instr, &next_pc);
+            j_type(cpu, decoded_instr, &next_pc);
             break;
 
         default:
             report_and_abort(INVALID_INSTRUCTION);
     }
 
-    cpu.regs[0] = 0; // x0 should always be zero
-    cpu.pc = next_pc;
+    cpu->regs[0] = 0; // x0 should always be zero
+    cpu->pc = next_pc;
 }
 
-void dump_cpu()
+void dump_cpu(cpu_t cpu)
 {
     printf("x0: %08X\nx1: %08X\nx2: %08X\nx3: %08X\n", cpu.regs[0], cpu.regs[1], cpu.regs[2], cpu.regs[3]);
     printf("x4: %08X\nx5: %08X\nx6: %08X\nx7: %08X\n", cpu.regs[4], cpu.regs[5], cpu.regs[6], cpu.regs[7]);
