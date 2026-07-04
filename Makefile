@@ -23,10 +23,6 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 $(BUILD_DIR)/elf_loader.o: $(SRC_DIR)/asm/elf_loader.s
 	@mkdir -p $(BUILD_DIR)
 	$(AS) -felf64 $(SRC_DIR)/asm/elf_loader.s -o $@
-	
-run: $(TARGET_BUILD)
-	@printf "\n[OK] Running...\n\n"
-	@./$(TARGET_BUILD)  
 
 clean:
 	rm -rf $(BUILD_DIR) $(TARGET_BUILD)
