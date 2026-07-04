@@ -81,15 +81,15 @@ load_elf:
   mov r10d, dword[rbp-76] ; p_vaddr 
   sub r10d, r12d ; ram_offset = p_vaddr - base_address
   cmp r10d, ecx 
-  mov edi, -4
+  mov edi, -5
   jg .return_error
 
   ; check p_memsz <= ram - ram_offset
   mov r9d, ecx ; ram
   sub r9d, r10d 
   cmp dword[rbp-64], r9d
-  mov edi, -4
-  jg .return_error ; TODO: there is a problem with this -> gdb  
+  mov edi, -5
+  jg .return_error 
 
   mov eax, 1
   mov edi, 1
@@ -125,15 +125,18 @@ load_elf:
 check_header:
   ; check magic numbers
   cmp dword[rdi], 0x464c457f ; this hex is '0x7f ELF' in little-endian mode
-  jne .done_err 
+  mov eax, -100 ; not a elf_file
+  jne .done 
   
   ; check bitness and endian mode 
   cmp word[rdi+4], 0x0101 ; 32-bit and little-endian 
-  jne .done_err  
+  mov eax, -99 ; not 32 but and little endian
+  jne .done  
 
   ; file type (must be executalbe) and architecture (must be RISC-V) 
   cmp dword[rdi+16], 0x00F30002 ; 0x02 = Executable file
-  jne .done_err
+  mov eax, -98 ; not riscv and not executable 
+  jne .done
 
   ; if everything's correct -> copy the program header fields
   mov eax, [rdi+24]
@@ -149,8 +152,4 @@ check_header:
   mov word[rsi+10], ax
 
 .done:
-  ret
-
-.done_err:
-  mov eax, -9
   ret
