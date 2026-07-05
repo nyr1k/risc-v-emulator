@@ -80,6 +80,16 @@ void report_and_abort(err_code error)
             abort();
             break;
 
+        case LOAD_ELF_LSEEK_FAIL:
+            printf("%s LOAD_ELF_LSEEK_FAIL (%d)\n\n", error_sentence, LOAD_ELF_LSEEK_FAIL);
+            abort();
+            break;
+
+        case LOAD_SEGMENT_FAIL:
+            printf("%s LOAD_SEGMENT_FAIL (%d)\n\n", error_sentence, LOAD_SEGMENT_FAIL);
+            abort();
+            break;
+
         default:
             break;
     }

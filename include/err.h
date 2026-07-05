@@ -19,7 +19,9 @@ typedef enum {
     WRONG_ENDIAN_OR_SYSTEM,
     WRONG_ARCHITECTURE_OR_NOT_EXEC,
     ELF_IS_CORRUPTED,
-    MEMORY_BOUNDS_HIT 
+    MEMORY_BOUNDS_HIT,
+    LOAD_ELF_LSEEK_FAIL,
+    LOAD_SEGMENT_FAIL
 } err_code;
 
 void report_and_abort(err_code error);
