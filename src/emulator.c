@@ -8,9 +8,10 @@ void emulator_init(emulator_t *emul, const char *elf_name)
 {
     cpu_init(&(emul->cpu));
     memory_init(&(emul->ram));
-    int err = load_elf(BASE_ADDRESS, emul->ram.memory, elf_name, MEMORY_SIZE);
+    printf("%p\n", emul->ram.memory);
+    int ret_val = load_elf(BASE_ADDRESS, emul->ram.memory, elf_name, MEMORY_SIZE);
 
-    switch (err) {
+    switch (ret_val) {
         case -1:
             report_and_abort(ELF_OPEN_FAIL);
             break;
@@ -26,6 +27,12 @@ void emulator_init(emulator_t *emul, const char *elf_name)
         case -5:
             report_and_abort(MEMORY_BOUNDS_HIT);
             break; 
+        case -6:
+            report_and_abort(LOAD_ELF_LSEEK_FAIL);
+            break;
+        case -7:
+            report_and_abort(LOAD_SEGMENT_FAIL);
+            break;
         case -98:
             report_and_abort(WRONG_ARCHITECTURE_OR_NOT_EXEC);
             break; 
@@ -36,6 +43,8 @@ void emulator_init(emulator_t *emul, const char *elf_name)
             report_and_abort(NOT_ELF_FILE);
             break; 
         default:
+            printf("Entry point: %08X\n", ret_val);
+            emul->cpu.pc = ret_val;
             break;
     }
 }   
