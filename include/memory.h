@@ -3,11 +3,12 @@
 
 #include <stdint.h> 
 
-#define MEMORY_SIZE 1024 * 1024 * 4 /* 4 MB memory */
-
-#define BASE_ADDRESS 0x80000000
-#define MMIO_BASE 0x10000000
-#define END_ADDRESS (BASE_ADDRESS + MEMORY_SIZE)
+enum : uint32_t {
+  MEMORY_SIZE  = 1024 * 1024 * 4, // 4MB 
+  BASE_ADDRESS = 0x80000000,
+  MMIO_BASE    = 0x10000000,
+  END_ADDRESS  = (BASE_ADDRESS + MEMORY_SIZE)
+};
 
 typedef struct {
   uint8_t memory[MEMORY_SIZE]; 
