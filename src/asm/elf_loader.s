@@ -17,30 +17,33 @@ load_elf:
   mov r12d, edi
   mov r13, rsi 
 
-  ; open the ELF file
-  mov eax, 2 ; sys_open
+
+; open the ELF file
+  mov eax, 2 
   mov rdi, rdx
-  mov esi, 0 ; O_RDONLY
-  mov edx, 0 ; no mode
+  mov esi, 0 
+  mov edx, 0 
   syscall
   ; return -1 if open fail
   cmp eax, 0 
   mov edi, -1
   jl .return_error
-  ; save fd 
+; save fd 
   mov ebx, eax  
 
-  ; load the ELF header
-  mov eax, 0 ; sys_read
-  mov edi, ebx ; fd 
+
+; load the ELF header
+  mov eax, 0 
+  mov edi, ebx 
   lea rsi, [rbp-52] ; buffer 
-  mov edx, 52 ; read 52 bytes 
+  mov edx, 52  
   syscall
   ; return -2 if read fail
   cmp eax, 52
   mov edi, -2
   jne .return_error
 
+; check the ELF header
   lea rdi, [rbp-52] ; pass elf_header 
   sub rsp, 12 ; create struct for e_entry, e_phoff, e_phentrysz, e_phnum
   lea rsi, [rsp-96] 
@@ -48,36 +51,39 @@ load_elf:
   cmp eax, 0
   mov edi, eax
   jl .return_error
-  mov r14, rsi
+  mov r14, rsi ; save the struct in r14
+
 
 ; traverse program headers   
-  xor r8d, r8d ; counter
+  mov r8d, 1 
 .ph_loop: 
   cmp r8w, word[r14+10] ; number of entries 
-  je .ph_done
+  jg .ph_done
 
-  ; read a program header entry 
-  mov eax, 0 ; sys_read
-  mov edi, ebx ; fd 
+; read a program header entry 
+  mov eax, 0 
+  mov edi, ebx 
   lea rsi, [rbp-84] ; program header buffer
-  mov edx, 32 ; entry_sz is 32 bytes on 32-bit systems 
+  mov dx, word[r14+8] ; entry_sz  
   syscall 
   ; return -3 if read fail
   cmp eax, 32 
   mov edi, -3
   jne .return_error
 
-  ; if not PT_LOAD -> read next entry 
+
+; if not PT_LOAD -> read next entry 
   cmp dword[rbp-84], 1 ; PT_LOAD
-  jne .continue 
-  
-  ; check p_filesz <= p_memsz, otherwise return error
+  jne .ph_continue 
+
+
+; check p_filesz <= p_memsz, otherwise return error
   mov r9d, dword[rbp-64] ; p_memsz
   cmp dword[rbp-68], r9d
   mov edi, -4
   jg .return_error
   
-  ; check ram_offset <= ram 
+; check ram_offset <= ram 
   mov r10d, dword[rbp-76] ; p_vaddr 
   sub r10d, r12d ; ram_offset = p_vaddr - base_address
   cmp r10d, ecx 
@@ -85,11 +91,62 @@ load_elf:
   jg .return_error
 
   ; check p_memsz <= ram - ram_offset
-  mov r9d, ecx ; ram
+  mov r9d, ecx 
   sub r9d, r10d 
   cmp dword[rbp-64], r9d
   mov edi, -5
   jg .return_error 
+
+
+.load_segment:
+; calculate the current offset in the file
+  xor r9d, r9d 
+  mov r9w, word[r14+8] ; e_phentsize
+  imul r9d, r8d 
+  add r9d, dword[r14+4] ; add e_phoff
+  
+; move to the loadable segment via lseek()
+  mov eax, 8 
+  mov edi, ebx  
+  mov esi, dword[rbp-80] ; segment offset in the file image
+  mov edx, 0 
+  syscall
+  ; if moved to incorrect offset -> error
+  cmp eax, dword[rbp-80]
+  mov edi, -6 
+  jne .return_error
+
+
+; copy the segment into the memory 
+  mov eax, 0 
+  mov edi, ebx 
+  add r10, r13 ; p_offset + *memory 
+  mov rsi, r10 
+  mov edx, dword[rbp-68] ; read p_filesz bytes
+  syscall
+  cmp eax, dword[rbp-68]
+  mov edi, -7
+  jne .return_error
+
+
+  mov eax, dword[rbp-68] ; p_filesz
+  cmp eax, dword[rbp-68] ; p_filesz = p_memsz ?
+  je .fill_bss_done
+  
+  add r10, rax ; bss_start
+  mov eax, dword[rbp-64]
+  add rax, r10 ; bss_finish
+
+.fill_bss:
+  cmp r10, rax 
+  je .fill_bss_done
+
+  mov byte[r10], 0 
+  
+  inc r10
+  jmp .fill_bss
+
+.fill_bss_done:
 
   mov eax, 1
   mov edi, 1
@@ -97,18 +154,32 @@ load_elf:
   mov edx, 8
   syscall
 
-.continue:
+; come back to the program header entry 
+  mov eax, 8 
+  mov edi, ebx 
+  mov esi, r9d 
+  mov edx, 0 ; SEEK_SET -> calculate from the beginning of the file
+  syscall
+  ; if moved to incorrect offset -> error 
+  cmp eax, r9d
+  mov edi, -6
+  jne .return_error 
+
+
+.ph_continue:
   inc r8w
   jmp .ph_loop 
 
 .ph_done: 
+
+  mov eax, dword[r14] ; entry_point 
+
   add rsp, 96
   pop r14
   pop r13
   pop r12
   pop rbx
   pop rbp
-  mov eax, 0
   ret 
 
 .return_error:
@@ -121,7 +192,7 @@ load_elf:
   mov eax, edi
   ret
 
-;;;
+
 check_header:
   ; check magic numbers
   cmp dword[rdi], 0x464c457f ; this hex is '0x7f ELF' in little-endian mode
@@ -150,6 +221,8 @@ check_header:
   
   mov ax, [rdi+44]
   mov word[rsi+10], ax
+
+  mov eax, 0
 
 .done:
   ret
