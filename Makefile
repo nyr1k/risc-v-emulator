@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -std=gnu99 -Wall -Wextra -Iinclude -O2 
+CFLAGS = -std=c23 -Wall -Wextra -Iinclude -O2 
 AS = nasm
 SRC_DIR = src
 BUILD_DIR = build
