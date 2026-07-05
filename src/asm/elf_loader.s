@@ -130,7 +130,7 @@ load_elf:
 
 
   mov eax, dword[rbp-68] ; p_filesz
-  cmp eax, dword[rbp-68] ; p_filesz = p_memsz ?
+  cmp eax, dword[rbp-64] ; p_filesz = p_memsz ?
   je .fill_bss_done
   
   add r10, rax ; bss_start
@@ -172,8 +172,9 @@ load_elf:
 
 .ph_done: 
 
-  mov eax, dword[r14] ; entry_point 
+  mov eax, dword[r14]
 
+.return:
   add rsp, 96
   pop r14
   pop r13
@@ -183,14 +184,8 @@ load_elf:
   ret 
 
 .return_error:
-  add rsp, 96
-  pop r14
-  pop r13
-  pop r12
-  pop rbx
-  pop rbp
   mov eax, edi
-  ret
+  jmp .return
 
 
 check_header:
