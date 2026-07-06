@@ -21,7 +21,8 @@ typedef enum {
     ELF_IS_CORRUPTED,
     MEMORY_BOUNDS_HIT,
     LOAD_ELF_LSEEK_FAIL,
-    LOAD_SEGMENT_FAIL
+    LOAD_SEGMENT_FAIL,
+    ELF_CLOSE_FAIL
 } err_code;
 
 void report_and_abort(err_code error);

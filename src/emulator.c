@@ -33,6 +33,9 @@ void emulator_init(emulator_t *emul, const char *elf_name)
         case -7:
             report_and_abort(LOAD_SEGMENT_FAIL);
             break;
+        case -8:
+            report_and_abort(ELF_CLOSE_FAIL);
+            break;
         case -98:
             report_and_abort(WRONG_ARCHITECTURE_OR_NOT_EXEC);
             break; 

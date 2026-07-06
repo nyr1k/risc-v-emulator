@@ -89,7 +89,10 @@ void report_and_abort(err_code error)
             printf("%s LOAD_SEGMENT_FAIL (%d)\n\n", error_sentence, LOAD_SEGMENT_FAIL);
             abort();
             break;
-
+        case ELF_CLOSE_FAIL:
+            printf("%s ELF_CLOSE_FAIL (%d)\n\n", error_sentence, ELF_CLOSE_FAIL);
+            abort();
+            break;
         default:
             break;
     }
