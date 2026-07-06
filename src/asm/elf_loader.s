@@ -1,3 +1,31 @@
+ELF_HEADER equ -54
+PH_HEADER equ -84
+
+; CH = check_header()
+CH_EI_MAG equ 0
+CH_EI_CLASS_DATA equ 4
+CH_E_TYPE_MACHINE equ 16
+CH_E_ENTRY equ 24
+CH_E_PHOFF equ 28
+CH_E_PHENTSIZE equ 42
+CH_E_PHNUM equ 44
+
+E_ENTRY equ 0
+E_PHOFF equ 4 
+E_PHENTSIZE equ 8
+E_PHNUM equ 10
+
+P_TYPE equ PH_HEADER + 0
+P_OFFSET equ PH_HEADER + 4
+P_VADDR equ PH_HEADER + 8
+P_FILESZ equ PH_HEADER + 16
+P_MEMSZ equ PH_HEADER + 20
+
+SYS_READ equ 0
+SYS_OPEN equ 2
+SYS_CLOSE equ 3
+SYS_LSEEK equ 8
+
 section .data 
   testMsg db "PT_LOAD", 10 
 section .text
@@ -19,7 +47,7 @@ load_elf:
 
 
 ; open the ELF file
-  mov eax, 2 
+  mov eax, SYS_OPEN
   mov rdi, rdx
   mov esi, 0 
   mov edx, 0 
@@ -33,9 +61,9 @@ load_elf:
 
 
 ; load the ELF header
-  mov eax, 0 
+  mov eax, SYS_READ 
   mov edi, ebx 
-  lea rsi, [rbp-52] ; buffer 
+  lea rsi, [rbp + ELF_HEADER]  
   mov edx, 52  
   syscall
   ; return -2 if read fail
@@ -44,7 +72,7 @@ load_elf:
   jne .return_error
 
 ; check the ELF header
-  lea rdi, [rbp-52] ; pass elf_header 
+  lea rdi, [rbp + ELF_HEADER]  
   sub rsp, 12 ; create struct for e_entry, e_phoff, e_phentrysz, e_phnum
   lea rsi, [rsp-96] 
   call check_header
@@ -57,14 +85,14 @@ load_elf:
 ; traverse program headers   
   mov r8d, 1 
 .ph_loop: 
-  cmp r8w, word[r14+10] ; number of entries 
+  cmp r8w, word[r14 + E_PHNUM] 
   jg .ph_done
 
 ; read a program header entry 
-  mov eax, 0 
+  mov eax, SYS_READ
   mov edi, ebx 
-  lea rsi, [rbp-84] ; program header buffer
-  mov dx, word[r14+8] ; entry_sz  
+  lea rsi, [rbp + PH_HEADER] ; program header buffer
+  mov dx, word[r14 + E_PHENTSIZE]  
   syscall 
   ; return -3 if read fail
   cmp eax, 32 
@@ -73,18 +101,18 @@ load_elf:
 
 
 ; if not PT_LOAD -> read next entry 
-  cmp dword[rbp-84], 1 ; PT_LOAD
+  cmp dword[rbp + P_TYPE], 1 
   jne .ph_continue 
 
 
 ; check p_filesz <= p_memsz, otherwise return error
-  mov r9d, dword[rbp-64] ; p_memsz
-  cmp dword[rbp-68], r9d
+  mov r9d, dword[rbp + P_MEMSZ] 
+  cmp dword[rbp + P_FILESZ], r9d
   mov edi, -4
   jg .return_error
   
 ; check ram_offset <= ram 
-  mov r10d, dword[rbp-76] ; p_vaddr 
+  mov r10d, dword[rbp + P_VADDR] 
   sub r10d, r12d ; ram_offset = p_vaddr - base_address
   cmp r10d, ecx 
   mov edi, -5
@@ -93,7 +121,7 @@ load_elf:
   ; check p_memsz <= ram - ram_offset
   mov r9d, ecx 
   sub r9d, r10d 
-  cmp dword[rbp-64], r9d
+  cmp dword[rbp + P_MEMSZ], r9d
   mov edi, -5
   jg .return_error 
 
@@ -101,40 +129,40 @@ load_elf:
 .load_segment:
 ; calculate the current offset in the file
   xor r9d, r9d 
-  mov r9w, word[r14+8] ; e_phentsize
+  mov r9w, word[r14 + E_PHENTSIZE]
   imul r9d, r8d 
-  add r9d, dword[r14+4] ; add e_phoff
+  add r9d, dword[r14 + E_PHOFF]
   
 ; move to the loadable segment via lseek()
-  mov eax, 8 
+  mov eax, SYS_LSEEK
   mov edi, ebx  
-  mov esi, dword[rbp-80] ; segment offset in the file image
+  mov esi, dword[rbp + P_OFFSET] 
   mov edx, 0 
   syscall
   ; if moved to incorrect offset -> error
-  cmp eax, dword[rbp-80]
+  cmp eax, dword[rbp + P_OFFSET]
   mov edi, -6 
   jne .return_error
 
 
 ; copy the segment into the memory 
-  mov eax, 0 
+  mov eax, SYS_READ
   mov edi, ebx 
   add r10, r13 ; p_offset + *memory 
   mov rsi, r10 
-  mov edx, dword[rbp-68] ; read p_filesz bytes
+  mov edx, dword[rbp + P_FILESZ]
   syscall
-  cmp eax, dword[rbp-68]
+  cmp eax, dword[rbp + P_FILESZ]
   mov edi, -7
   jne .return_error
 
 
-  mov eax, dword[rbp-68] ; p_filesz
-  cmp eax, dword[rbp-64] ; p_filesz = p_memsz ?
+  mov eax, dword[rbp + P_FILESZ]
+  cmp eax, dword[rbp + P_MEMSZ]
   je .fill_bss_done
   
   add r10, rax ; bss_start
-  mov eax, dword[rbp-64]
+  mov eax, dword[rbp + P_MEMSZ]
   add rax, r10 ; bss_finish
 
 .fill_bss:
@@ -155,7 +183,7 @@ load_elf:
   syscall
 
 ; come back to the program header entry 
-  mov eax, 8 
+  mov eax, SYS_LSEEK
   mov edi, ebx 
   mov esi, r9d 
   mov edx, 0 ; SEEK_SET -> calculate from the beginning of the file
@@ -172,7 +200,15 @@ load_elf:
 
 .ph_done: 
 
-  mov eax, dword[r14]
+  mov eax, SYS_CLOSE
+  mov edi, ebx
+  syscall 
+  cmp eax, 0
+  mov edi, -8
+  jl .return_error 
+
+
+  mov eax, dword[r14 + E_ENTRY]
 
 .return:
   add rsp, 96
@@ -190,31 +226,31 @@ load_elf:
 
 check_header:
   ; check magic numbers
-  cmp dword[rdi], 0x464c457f ; this hex is '0x7f ELF' in little-endian mode
+  cmp dword[rdi + CH_EI_MAG], 0x464c457f ; this hex is '0x7f ELF' in little-endian mode
   mov eax, -100 ; not a elf_file
   jne .done 
   
   ; check bitness and endian mode 
-  cmp word[rdi+4], 0x0101 ; 32-bit and little-endian 
+  cmp word[rdi + CH_EI_CLASS_DATA], 0x0101 ; 32-bit and little-endian 
   mov eax, -99 ; not 32 but and little endian
   jne .done  
 
   ; file type (must be executalbe) and architecture (must be RISC-V) 
-  cmp dword[rdi+16], 0x00F30002 ; 0x02 = Executable file
+  cmp dword[rdi + CH_E_TYPE_MACHINE], 0x00F30002 
   mov eax, -98 ; not riscv and not executable 
   jne .done
 
   ; if everything's correct -> copy the program header fields
-  mov eax, [rdi+24]
+  mov eax, [rdi + CH_E_ENTRY]
   mov dword[rsi], eax 
   
-  mov eax, [rdi+28]
+  mov eax, [rdi + CH_E_PHOFF]
   mov dword[rsi+4], eax
   
-  mov ax, [rdi+42]
+  mov ax, [rdi + CH_E_PHENTSIZE]
   mov word[rsi+8], ax
   
-  mov ax, [rdi+44]
+  mov ax, [rdi + CH_E_PHNUM]
   mov word[rsi+10], ax
 
   mov eax, 0
