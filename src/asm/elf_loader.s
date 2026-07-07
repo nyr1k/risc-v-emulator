@@ -39,7 +39,7 @@ load_elf:
   push r13 
   push r14
   mov rbp, rsp
-  sub rsp, 84 ; elf_header (52 bytes) & program_header (32 bytes) 
+  sub rsp, 96 ; elf_header (52 bytes) & program_header (32 bytes) & struct elf_info (12 bytes) 
 
   ; save arguments before syscalls
   mov r12d, edi
@@ -73,7 +73,6 @@ load_elf:
 
 ; check the ELF header
   lea rdi, [rbp + ELF_HEADER]  
-  sub rsp, 12 ; create struct for e_entry, e_phoff, e_phentrysz, e_phnum
   lea rsi, [rbp-96] 
   call check_header
   cmp eax, 0
