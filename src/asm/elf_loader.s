@@ -74,7 +74,7 @@ load_elf:
 ; check the ELF header
   lea rdi, [rbp + ELF_HEADER]  
   sub rsp, 12 ; create struct for e_entry, e_phoff, e_phentrysz, e_phnum
-  lea rsi, [rsp-96] 
+  lea rsi, [rbp-96] 
   call check_header
   cmp eax, 0
   mov edi, eax
@@ -105,25 +105,31 @@ load_elf:
   jne .ph_continue 
 
 
+; check p_vaddr >= base_address
+  mov r9d, dword[rbp + P_VADDR]
+  cmp r9d, r12d 
+  mov edi, -5
+  jb .return_error
+
 ; check p_filesz <= p_memsz, otherwise return error
   mov r9d, dword[rbp + P_MEMSZ] 
   cmp dword[rbp + P_FILESZ], r9d
   mov edi, -4
-  jg .return_error
+  ja .return_error
   
 ; check ram_offset <= ram 
   mov r10d, dword[rbp + P_VADDR] 
   sub r10d, r12d ; ram_offset = p_vaddr - base_address
   cmp r10d, ecx 
   mov edi, -5
-  jg .return_error
+  ja .return_error
 
   ; check p_memsz <= ram - ram_offset
   mov r9d, ecx 
   sub r9d, r10d 
   cmp dword[rbp + P_MEMSZ], r9d
   mov edi, -5
-  jg .return_error 
+  ja .return_error 
 
 
 .load_segment:
