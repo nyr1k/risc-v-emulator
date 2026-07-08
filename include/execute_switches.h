@@ -8,7 +8,7 @@
 #include <misc.h>
 
 void r_type(cpu_t *cpu, const Decoded_instruction decoded_instr);
-void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_pc, ram_t ram);
+void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_pc, const ram_t *ram);
 void s_type(cpu_t *cpu, const Decoded_instruction decoded_instr, ram_t *ram);
 void u_type(cpu_t *cpu, const Decoded_instruction decoded_instr);
 void b_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_pc);
