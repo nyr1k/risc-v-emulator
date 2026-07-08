@@ -17,6 +17,8 @@ int main(int argc, char *argv[]) {
 
   emulator_t rv32i;   
   emulator_init(&rv32i, argv[1]);
+  inspect_ram(&(rv32i.ram), 0x80000000, 6);
+  emulator_step(&rv32i);
 
 //   dump_cpu();
 
