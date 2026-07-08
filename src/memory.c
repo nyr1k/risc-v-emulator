@@ -17,7 +17,7 @@ void memory_init(ram_t *ram)
     memset(ram->memory, 0, sizeof(ram->memory));
 }
 
-uint32_t read_word(ram_t ram, uint32_t address) 
+uint32_t read_word(const ram_t *ram, uint32_t address) 
 {
     if (check_address(address) != RAM_ADDRESS) report_and_abort(INVALID_READ_ADDRESS);
     
@@ -25,10 +25,10 @@ uint32_t read_word(ram_t ram, uint32_t address)
     uint32_t word = 0;
 
     /* RISC-V uses little-endian mode */
-    word += (uint32_t)ram.memory[true_address];
-    word += ((uint32_t)ram.memory[true_address+1] << 8);
-    word += ((uint32_t)ram.memory[true_address+2] << 16);
-    word += ((uint32_t)ram.memory[true_address+3] << 24);
+    word += (uint32_t)ram->memory[true_address];
+    word += ((uint32_t)ram->memory[true_address+1] << 8);
+    word += ((uint32_t)ram->memory[true_address+2] << 16);
+    word += ((uint32_t)ram->memory[true_address+3] << 24);
     
     return word;
 }
@@ -56,7 +56,7 @@ void write_word(ram_t *ram, uint32_t address, uint32_t data)
     }
 }
 
-uint16_t read_halfword(ram_t ram, uint32_t address)
+uint16_t read_halfword(const ram_t *ram, uint32_t address)
 {
     if (check_address(address) != RAM_ADDRESS) report_and_abort(INVALID_READ_ADDRESS);
     
@@ -64,8 +64,8 @@ uint16_t read_halfword(ram_t ram, uint32_t address)
     uint16_t halfword = 0;
 
     /* RISC-V uses little-endian mode */
-    halfword += (uint16_t)ram.memory[true_address];
-    halfword += ((uint16_t)ram.memory[true_address+1] << 8);
+    halfword += (uint16_t)ram->memory[true_address];
+    halfword += ((uint16_t)ram->memory[true_address+1] << 8);
     
     return halfword;
 }
@@ -91,7 +91,7 @@ void write_halfword(ram_t *ram, uint32_t address, uint16_t data)
     }
 }
 
-uint8_t read_byte(ram_t ram, uint32_t address)
+uint8_t read_byte(const ram_t *ram, uint32_t address)
 {
     if (check_address(address) != RAM_ADDRESS) report_and_abort(INVALID_READ_ADDRESS);
     
@@ -99,7 +99,7 @@ uint8_t read_byte(ram_t ram, uint32_t address)
     uint8_t byte = 0;
 
     /* RISC-V uses little-endian mode */
-    byte += (uint8_t)ram.memory[true_address];
+    byte += (uint8_t)ram->memory[true_address];
     
     return byte;
 }
@@ -122,4 +122,15 @@ void write_byte(ram_t *ram, uint32_t address, uint8_t data)
         default:
             break;
     }
+}
+
+void inspect_ram(ram_t *ram, uint32_t address, uint32_t words_num) 
+{
+    printf("\n------------------------------------\n[DEBUG] INSPECT RAM START\n");
+    for (unsigned int i = 0; i < words_num; i++) {
+        printf("0x%08x: %08x\n", address, read_word(ram, address));
+        
+        address += 4;
+    }
+    printf("\n[DEBUG] INSPECT RAM END\n------------------------------------\n");
 }

@@ -22,13 +22,15 @@ typedef enum : uint8_t {
 
 void memory_init(ram_t *ram); 
 
-uint32_t read_word(ram_t ram, uint32_t address);
+uint32_t read_word(const ram_t *ram, uint32_t address);
 void write_word(ram_t *ram, uint32_t address, uint32_t data);
 
-uint16_t read_halfword(ram_t ram, uint32_t address);
+uint16_t read_halfword(const ram_t *ram, uint32_t address);
 void write_halfword(ram_t *ram, uint32_t address, uint16_t data);
 
-uint8_t read_byte(ram_t ram, uint32_t address);
+uint8_t read_byte(const ram_t *ram, uint32_t address);
 void write_byte(ram_t *ram, uint32_t address, uint8_t data);
+
+void inspect_ram(ram_t *ram, uint32_t address, uint32_t words_num);
 
 #endif 
