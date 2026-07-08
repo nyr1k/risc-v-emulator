@@ -1,4 +1,6 @@
-#include "memory.h"
+#include <cpu.h>
+#include <memory.h>
+#include <misc.h>
 #include <emulator.h>
 #include <err.h>
 
@@ -51,3 +53,11 @@ void emulator_init(emulator_t *emul, const char *elf_name)
             break;
     }
 }   
+
+void emulator_step(emulator_t *emul)
+{
+    Instruction instr = fetch(&(emul->ram), emul->cpu);
+    Decoded_instruction d_instr = decode(instr);
+    execute(&(emul->cpu), d_instr, &(emul->ram));
+    dump_cpu(emul->cpu);
+}
