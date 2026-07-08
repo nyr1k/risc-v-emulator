@@ -10,7 +10,6 @@ void emulator_init(emulator_t *emul, const char *elf_name)
 {
     cpu_init(&(emul->cpu));
     memory_init(&(emul->ram));
-    printf("%p\n", emul->ram.memory);
     int ret_val = load_elf(BASE_ADDRESS, emul->ram.memory, elf_name, MEMORY_SIZE);
 
     switch (ret_val) {
@@ -48,8 +47,8 @@ void emulator_init(emulator_t *emul, const char *elf_name)
             report_and_abort(NOT_ELF_FILE);
             break; 
         default:
-            printf("Entry point: %08X\n", ret_val);
-            emul->cpu.pc = ret_val;
+            printf("[OK] ELF LOAD SUCCESS\n");
+            emul->cpu.pc = (uint32_t) ret_val;
             break;
     }
 }   
@@ -59,5 +58,17 @@ void emulator_step(emulator_t *emul)
     Instruction instr = fetch(&(emul->ram), &(emul->cpu));
     Decoded_instruction d_instr = decode(instr);
     execute(&(emul->cpu), d_instr, &(emul->ram));
-    dump_cpu(emul->cpu);
+}
+
+void emulator_run(emulator_t *emul)
+{
+    uint32_t prev_pc = 0;
+    while (1) {
+        emulator_step(emul);
+        
+        if (emul->cpu.pc == prev_pc) 
+            break;
+
+        prev_pc = emul->cpu.pc;
+    }
 }
