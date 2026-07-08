@@ -15,6 +15,7 @@ static inline int check_address(const uint32_t address)
 void memory_init(ram_t *ram) 
 {
     memset(ram->memory, 0, sizeof(ram->memory));
+    printf("[OK] RAM INIT SUCCESS\n");
 }
 
 uint32_t read_word(const ram_t *ram, uint32_t address) 
@@ -126,7 +127,7 @@ void write_byte(ram_t *ram, uint32_t address, uint8_t data)
 
 void inspect_ram(ram_t *ram, uint32_t address, uint32_t words_num) 
 {
-    printf("\n------------------------------------\n[DEBUG] INSPECT RAM START\n");
+    printf("\n------------------------------------\n[DEBUG] INSPECT RAM START\n\n");
     for (unsigned int i = 0; i < words_num; i++) {
         printf("0x%08x: %08x\n", address, read_word(ram, address));
         
