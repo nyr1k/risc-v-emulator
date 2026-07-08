@@ -12,7 +12,7 @@ typedef struct {
 
 void cpu_init(cpu_t *cpu);
 
-Instruction fetch(ram_t ram, cpu_t cpu);
+Instruction fetch(const ram_t *ram, const cpu_t *cpu);
 Decoded_instruction decode(const Instruction instr);
 void execute(cpu_t *cpu, const Decoded_instruction decoded_instr, ram_t *ram);
 
