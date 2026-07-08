@@ -55,7 +55,7 @@ void r_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
     }
 }
 
-void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_pc, ram_t ram)
+void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_pc, const ram_t *ram)
 {
     switch (decoded_instr.opcode) {
         
