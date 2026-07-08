@@ -56,7 +56,7 @@ void emulator_init(emulator_t *emul, const char *elf_name)
 
 void emulator_step(emulator_t *emul)
 {
-    Instruction instr = fetch(&(emul->ram), emul->cpu);
+    Instruction instr = fetch(&(emul->ram), &(emul->cpu));
     Decoded_instruction d_instr = decode(instr);
     execute(&(emul->cpu), d_instr, &(emul->ram));
     dump_cpu(emul->cpu);
