@@ -5,6 +5,8 @@
 #include <memory.h>
 #include <misc.h>
 
+#define SP 2
+
 typedef struct {
   uint32_t regs[32];
   uint32_t pc;    

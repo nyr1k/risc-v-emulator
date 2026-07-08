@@ -49,6 +49,17 @@ void emulator_init(emulator_t *emul, const char *elf_name)
         default:
             printf("[OK] ELF LOAD SUCCESS\n");
             emul->cpu.pc = (uint32_t) ret_val;
+
+            /*
+                for now, I initialize SP here, but later I want to add 
+                a symbol in the linker.ld _stack_start, and parse the symbol table
+                in load_elf and initialize sp there 
+
+                for C programs, C runtime will overwrite the SP register if it needs to,
+                but I think that there will be no need in that. 
+                Anyway, just wanted to share the design.  
+            */
+            emul->cpu.regs[SP] = BASE_ADDRESS + MEMORY_SIZE;
             break;
     }
 }   
