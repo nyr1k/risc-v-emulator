@@ -26,8 +26,6 @@ SYS_OPEN equ 2
 SYS_CLOSE equ 3
 SYS_LSEEK equ 8
 
-section .data 
-  testMsg db "PT_LOAD", 10 
 section .text
   global load_elf 
 
@@ -180,12 +178,6 @@ load_elf:
   jmp .fill_bss
 
 .fill_bss_done:
-
-  mov eax, 1
-  mov edi, 1
-  mov rsi, testMsg
-  mov edx, 8
-  syscall
 
 ; come back to the program header entry 
   mov eax, SYS_LSEEK
