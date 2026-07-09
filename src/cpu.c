@@ -120,14 +120,14 @@ void dump_cpu(cpu_t cpu)
 {
     printf("\n------------------------------------\n[DEBUG] INSPECT CPU START\n\n");
     
-    printf("x0:  %08X x1:  %08X x2:  %08X x3:  %08X\n", cpu.regs[0], cpu.regs[1], cpu.regs[2], cpu.regs[3]);
-    printf("x4:  %08X x5:  %08X x6:  %08X x7:  %08X\n", cpu.regs[4], cpu.regs[5], cpu.regs[6], cpu.regs[7]);
-    printf("x8:  %08X x9:  %08X x10: %08X x11: %08X\n", cpu.regs[8], cpu.regs[9], cpu.regs[10], cpu.regs[11]);
-    printf("x12: %08X x13: %08X x14: %08X x15: %08X\n", cpu.regs[12], cpu.regs[13], cpu.regs[14], cpu.regs[15]);
-    printf("x16: %08X x17: %08X x18: %08X x19: %08X\n", cpu.regs[16], cpu.regs[17], cpu.regs[18], cpu.regs[19]);
-    printf("x20: %08X x21: %08X x22: %08X x23: %08X\n", cpu.regs[20], cpu.regs[21], cpu.regs[22], cpu.regs[23]);
-    printf("x24: %08X x25: %08X x26: %08X x27: %08X\n", cpu.regs[24], cpu.regs[25], cpu.regs[26], cpu.regs[27]);
-    printf("x28: %08X x29: %08X x30: %08X x31: %08X\n", cpu.regs[28], cpu.regs[29], cpu.regs[30], cpu.regs[31]);
+    printf("x0: %08X  ra: %08X  sp:  %08X  gp:  %08X\n", cpu.regs[0], cpu.regs[1], cpu.regs[2], cpu.regs[3]);
+    printf("tp: %08X  t0: %08X  t1:  %08X  t2:  %08X\n", cpu.regs[4], cpu.regs[5], cpu.regs[6], cpu.regs[7]);
+    printf("s0: %08X  s1: %08X  a0:  %08X  a1:  %08X\n", cpu.regs[8], cpu.regs[9], cpu.regs[10], cpu.regs[11]);
+    printf("a2: %08X  a3: %08X  a4:  %08X  a5:  %08X\n", cpu.regs[12], cpu.regs[13], cpu.regs[14], cpu.regs[15]);
+    printf("a6: %08X  a7: %08X  s2:  %08X  s3:  %08X\n", cpu.regs[16], cpu.regs[17], cpu.regs[18], cpu.regs[19]);
+    printf("s4: %08X  s5: %08X  s6:  %08X  s7:  %08X\n", cpu.regs[20], cpu.regs[21], cpu.regs[22], cpu.regs[23]);
+    printf("s8: %08X  s9: %08X  s10: %08X  s11: %08X\n", cpu.regs[24], cpu.regs[25], cpu.regs[26], cpu.regs[27]);
+    printf("t3: %08X  t4: %08X  t5:  %08X  t6:  %08X\n", cpu.regs[28], cpu.regs[29], cpu.regs[30], cpu.regs[31]);
     printf("pc:  %08X\n", cpu.pc);
 
     printf("\n[DEBUG] INSPECT CPU END\n------------------------------------\n");
