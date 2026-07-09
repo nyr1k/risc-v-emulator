@@ -10,6 +10,7 @@ It currently supports ELF loading, subset of rv32i instruction set, and executio
 
 ## Build & Run
 `make`
+
 `./rv32i test/bin/NAME.elf`
 
 ## Example 
@@ -25,7 +26,11 @@ sudo dnf install autoconf automake libmpc-devel mpfr-devel gmp-devel gawk bison 
 ```
 ```bash 
 git clone --recursive https://github.com/riscv-collab/riscv-gnu-toolchain
+```
+```bash
 cd riscv-gnu-toolchain
+```
+```bash
 ./configure --prefix=/opt/riscv --with-arch=rv32i --with-abi=ilp32
 make -j$(nproc)
 ```         
@@ -35,7 +40,7 @@ Then, you should add `/opt/riscv/bin` to your PATH.
 export PATH="/opt/riscv/bin:$PATH"
 ```
 
-After that, you can write test assembly program in `test/risc_test/` and `make`.
+After that, you can write test assembly program in `test/risc_test/`, and then `make`.
 
 ## TODO
 - Refactor ELF loader because I don't like the structure
