@@ -26,8 +26,6 @@ sudo dnf install autoconf automake libmpc-devel mpfr-devel gmp-devel gawk bison 
 ```
 ```bash 
 git clone --recursive https://github.com/riscv-collab/riscv-gnu-toolchain
-```
-```bash
 cd riscv-gnu-toolchain
 ```
 ```bash
