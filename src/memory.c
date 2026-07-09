@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -129,6 +130,7 @@ void inspect_ram(ram_t *ram, uint32_t address, uint32_t words_num)
 {
     printf("\n------------------------------------\n[DEBUG] INSPECT RAM START\n\n");
     for (unsigned int i = 0; i < words_num; i++) {
+        check_address(address);
         printf("0x%08x: %08x\n", address, read_word(ram, address));
         
         address += 4;
