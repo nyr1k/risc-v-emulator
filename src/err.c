@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #include <err.h>
 
 static const char *error_sentence = "[ERR] Aborting the program:";
@@ -91,6 +94,10 @@ void report_and_abort(err_code error)
             break;
         case ELF_CLOSE_FAIL:
             fprintf(stderr,"%s ELF_CLOSE_FAIL (%d)\n\n", error_sentence, ELF_CLOSE_FAIL);
+            abort();
+            break;
+        case SEGFAULT:
+            fprintf(stderr,"%s Segmentation fault (%d)\n\n", error_sentence, SEGFAULT);
             abort();
             break;
         default:

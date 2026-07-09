@@ -1,9 +1,6 @@
 #ifndef ERR_H
 #define ERR_H
 
-#include <stdlib.h>
-#include <stdio.h>
-
 typedef enum {
     INVALID_MEMORY_ACCESS,
     INVALID_READ_ADDRESS,
@@ -22,7 +19,8 @@ typedef enum {
     MEMORY_BOUNDS_HIT,
     LOAD_ELF_LSEEK_FAIL,
     LOAD_SEGMENT_FAIL,
-    ELF_CLOSE_FAIL
+    ELF_CLOSE_FAIL,
+    SEGFAULT
 } err_code;
 
 void report_and_abort(err_code error);
