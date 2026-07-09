@@ -5,18 +5,18 @@ LD = riscv32-unknown-elf-ld
 AS_FLAGS = -march=rv32i 
 LD_FLAGS = -T linker.ld
 
-SRC = $(wildcard rv32i/*.s)
-OBJ = $(patsubst rv32i/%.s, build/%.o, $(SRC))
+SRC = $(wildcard risc_test/*.s)
+OBJ = $(patsubst risc_test/%.s, build/%.o, $(SRC))
 ELF = $(patsubst build/%.o, bin/%.elf, $(OBJ))    
 
 all: $(ELF)
 
-build/%.o: rv32i/%.s
-	mkdir -p build
+build/%.o: risc_test/%.s
+	@mkdir -p build
 	$(AS) $(AS_FLAGS) -o $@ $<
 
 bin/%.elf: build/%.o linker.ld
-	mkdir -p bin
+	@mkdir -p bin
 	$(LD) $(LD_FLAGS) -o $@ $<
 
 clean: 
