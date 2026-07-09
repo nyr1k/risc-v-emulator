@@ -1,15 +1,16 @@
 .PHONY: all clean
+.SECONDARY: $(OBJS)
 
 AS = riscv32-unknown-elf-as
 LD = riscv32-unknown-elf-ld
 AS_FLAGS = -march=rv32i 
 LD_FLAGS = -T linker.ld
 
-SRC = $(wildcard risc_test/*.s)
-OBJ = $(patsubst risc_test/%.s, build/%.o, $(SRC))
-ELF = $(patsubst build/%.o, bin/%.elf, $(OBJ))    
+SRCS = $(wildcard risc_test/*.s)
+OBJS = $(patsubst risc_test/%.s, build/%.o, $(SRCS))
+ELFS = $(patsubst build/%.o, bin/%.elf, $(OBJS))    
 
-all: $(ELF)
+all: $(ELFS)
 
 build/%.o: risc_test/%.s
 	@mkdir -p build
