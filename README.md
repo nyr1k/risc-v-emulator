@@ -15,7 +15,7 @@ It currently supports ELF loading, subset of rv32i instruction set, and executio
 ## Example 
 `./rv32i test/bin/addi.elf`
 
-![Alt text](/example.png)
+![Alt text](/ex.png)
 
 ## TODO
 - Refactor ELF loader because I don't like the structure
