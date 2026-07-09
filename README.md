@@ -20,15 +20,20 @@ It currently supports ELF loading, subset of rv32i instruction set, and executio
 ## Custom tests
 If you want to do your custom tests, then you will have to get riscv-gnu-toolchain from https://github.com/riscv-collab/riscv-gnu-toolchain.
 
-`sudo dnf install autoconf automake libmpc-devel mpfr-devel gmp-devel gawk bison flex texinfo patchutils gcc gcc-c++ zlib-devel expat-devel git`
-
-`git clone --recursive https://github.com/riscv-collab/riscv-gnu-toolchain
+```bash
+sudo dnf install autoconf automake libmpc-devel mpfr-devel gmp-devel gawk bison flex texinfo patchutils gcc gcc-c++ zlib-devel expat-devel git
+```
+```bash 
+git clone --recursive https://github.com/riscv-collab/riscv-gnu-toolchain
 cd riscv-gnu-toolchain
 ./configure --prefix=/opt/riscv --with-arch=rv32i --with-abi=ilp32
-make -j$(nproc)`         
+make -j$(nproc)
+```         
 
 Then, you should add `/opt/riscv/bin` to your PATH. 
-`export PATH="/opt/riscv/bin:$PATH"`
+```bash
+export PATH="/opt/riscv/bin:$PATH"
+```
 
 After that, you can write test assembly program in `test/risc_test/` and `make`.
 
