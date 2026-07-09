@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include <cpu.h>
 #include <memory.h>
 #include <misc.h>
@@ -59,7 +61,7 @@ void emulator_init(emulator_t *emul, const char *elf_name)
                 but I think that there will be no need in that. 
                 Anyway, just wanted to share the design.  
             */
-            emul->cpu.regs[SP] = BASE_ADDRESS + MEMORY_SIZE;
+            emul->cpu.regs[SP] = STACK_TOP;
             break;
     }
 }   
@@ -69,6 +71,10 @@ void emulator_step(emulator_t *emul)
     Instruction instr = fetch(&(emul->ram), &(emul->cpu));
     Decoded_instruction d_instr = decode(instr);
     execute(&(emul->cpu), d_instr, &(emul->ram));
+
+    /* Check if $sp overflowed*/
+    if (emul->cpu.regs[SP] < STACK_LIMIT)
+        report_and_abort(SEGFAULT);
 }
 
 void emulator_run(emulator_t *emul)
