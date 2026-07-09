@@ -1,5 +1,4 @@
 build
 rv32i
-test
 compile_commands.json
 .vscode
