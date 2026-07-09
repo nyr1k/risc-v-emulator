@@ -126,7 +126,7 @@ void write_byte(ram_t *ram, uint32_t address, uint8_t data)
     }
 }
 
-void inspect_ram(ram_t *ram, uint32_t address, uint32_t words_num) 
+void inspect_ram(const ram_t *ram, uint32_t address, uint32_t words_num) 
 {
     printf("\n------------------------------------\n[DEBUG] INSPECT RAM START\n\n");
     for (unsigned int i = 0; i < words_num; i++) {

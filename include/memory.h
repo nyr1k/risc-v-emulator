@@ -33,6 +33,6 @@ void write_halfword(ram_t *ram, uint32_t address, uint16_t data);
 uint8_t read_byte(const ram_t *ram, uint32_t address);
 void write_byte(ram_t *ram, uint32_t address, uint8_t data);
 
-void inspect_ram(ram_t *ram, uint32_t address, uint32_t words_num);
+void inspect_ram(const ram_t *ram, uint32_t address, uint32_t words_num);
 
 #endif 
