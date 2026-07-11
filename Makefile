@@ -6,6 +6,7 @@ BUILD_DIR = build
 TARGET_BUILD = rv32i
 
 SRC = $(wildcard $(SRC_DIR)/*.c)
+HDR = $(wildcard include/*.h)
 OBJ = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRC))
 OBJ += $(BUILD_DIR)/elf_loader.o
 
@@ -16,7 +17,7 @@ all: $(TARGET_BUILD)
 $(TARGET_BUILD): $(OBJ) 		
 	$(CC) $(CFLAGS) -o $@ $(OBJ)
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(HDR)
 	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@ 
 
