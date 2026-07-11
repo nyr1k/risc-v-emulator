@@ -24,7 +24,7 @@ static inline int32_t sign_extend(uint32_t value, int bits)
 
 static inline uint32_t shift_right_arith(uint32_t value, int bits)
 {
-    return ~(((int32_t)(~value)) >> (bits));
+    return (uint32_t)((int32_t)value >> (bits));
 }
 
 #endif
