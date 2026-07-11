@@ -6,10 +6,10 @@
 enum : uint32_t {
   MEMORY_SIZE  = 1024 * 1024 * 4, // 4 MiB 
   BASE_ADDRESS = 0x80000000,
+  END_ADDRESS  = (BASE_ADDRESS + MEMORY_SIZE),
   MMIO_BASE    = 0x10000000,
-  STACK_TOP    = (BASE_ADDRESS + MEMORY_SIZE),
-  STACK_LIMIT  = (STACK_TOP - 0x00001000), // max stack size = 4 KiB
-  END_ADDRESS  = (BASE_ADDRESS + MEMORY_SIZE)
+  STACK_TOP    = END_ADDRESS,
+  STACK_LIMIT  = (STACK_TOP - 0x00001000) // max stack size = 4 KiB
 };
 
 typedef struct {

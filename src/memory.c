@@ -5,9 +5,9 @@
 #include <memory.h>
 #include <err.h>
 
-static inline int check_address(const uint32_t address)
+static inline int check_address(const uint32_t address, const uint32_t size)
 {
-    if (address >= BASE_ADDRESS && address < BASE_ADDRESS+MEMORY_SIZE) return RAM_ADDRESS;
+    if (address >= BASE_ADDRESS && address < END_ADDRESS && size < END_ADDRESS - address) return RAM_ADDRESS;
     else if (address == MMIO_BASE) return MMIO_ADDRESS;
     else report_and_abort(INVALID_MEMORY_ACCESS);
     return 0;
@@ -21,7 +21,7 @@ void memory_init(ram_t *ram)
 
 uint32_t read_word(const ram_t *ram, uint32_t address) 
 {
-    if (check_address(address) != RAM_ADDRESS) report_and_abort(INVALID_READ_ADDRESS);
+    if (check_address(address, 4) != RAM_ADDRESS) report_and_abort(INVALID_READ_ADDRESS);
     
     uint32_t true_address = address - BASE_ADDRESS; 
     uint32_t word = 0;
@@ -37,7 +37,7 @@ uint32_t read_word(const ram_t *ram, uint32_t address)
 
 void write_word(ram_t *ram, uint32_t address, uint32_t data) 
 {
-    switch (check_address(address)) {
+    switch (check_address(address, 4)) {
         case INVALID_ADDRESS:
             report_and_abort(INVALID_WRITE_ADDRESS);
             break;
@@ -60,7 +60,7 @@ void write_word(ram_t *ram, uint32_t address, uint32_t data)
 
 uint16_t read_halfword(const ram_t *ram, uint32_t address)
 {
-    if (check_address(address) != RAM_ADDRESS) report_and_abort(INVALID_READ_ADDRESS);
+    if (check_address(address, 2) != RAM_ADDRESS) report_and_abort(INVALID_READ_ADDRESS);
     
     uint32_t true_address = address - BASE_ADDRESS; 
     uint16_t halfword = 0;
@@ -74,7 +74,7 @@ uint16_t read_halfword(const ram_t *ram, uint32_t address)
 
 void write_halfword(ram_t *ram, uint32_t address, uint16_t data)
 {
-    switch (check_address(address)) {
+    switch (check_address(address, 2)) {
         case INVALID_ADDRESS:
             report_and_abort(INVALID_WRITE_ADDRESS);
             break;
@@ -95,7 +95,7 @@ void write_halfword(ram_t *ram, uint32_t address, uint16_t data)
 
 uint8_t read_byte(const ram_t *ram, uint32_t address)
 {
-    if (check_address(address) != RAM_ADDRESS) report_and_abort(INVALID_READ_ADDRESS);
+    if (check_address(address, 1) != RAM_ADDRESS) report_and_abort(INVALID_READ_ADDRESS);
     
     uint32_t true_address = address - BASE_ADDRESS; 
     uint8_t byte = 0;
@@ -108,7 +108,7 @@ uint8_t read_byte(const ram_t *ram, uint32_t address)
 
 void write_byte(ram_t *ram, uint32_t address, uint8_t data)
 {
-    switch (check_address(address)) {
+    switch (check_address(address, 1)) {
         case INVALID_ADDRESS:
             report_and_abort(INVALID_WRITE_ADDRESS);
             break;
@@ -130,7 +130,7 @@ void inspect_ram(const ram_t *ram, uint32_t address, uint32_t words_num)
 {
     printf("\n------------------------------------\n[DEBUG] INSPECT RAM START\n\n");
     for (unsigned int i = 0; i < words_num; i++) {
-        check_address(address);
+        check_address(address, 4);
         printf("0x%08x: %08x\n", address, read_word(ram, address));
         
         address += 4;
