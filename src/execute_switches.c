@@ -150,13 +150,15 @@ void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_
             break;
         }
 
-        case 0x67:
-            cpu->regs[decoded_instr.rd] = *next_pc;
-            *next_pc = (cpu->regs[decoded_instr.rs1] + decoded_instr.imm) & ~1; // because the immediate is not shifted by 1 bit, we clear the lowest bit manually
-            if ((*next_pc & 0x3) != 0) // Target address should 4-byte aligned
+        case 0x67: {
+            uint32_t target = (cpu->regs[decoded_instr.rs1] + decoded_instr.imm) & ~1U; // because the immediate is not shifted by 1 bit, we clear the lowest bit manually
+            if ((target & 0x3) != 0) // Target address should 4-byte aligned
                 report_and_abort(INVALID_INSTRUCTION_ALIGNMENT);
-            break;
 
+            cpu->regs[decoded_instr.rd] = *next_pc;
+            *next_pc = target;
+            break; 
+        }
         default:
             report_and_abort(INVALID_INSTRUCTION);
     } 
