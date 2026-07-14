@@ -69,14 +69,15 @@ Decoded_instruction decode(const Instruction instr)
 
 
 
-void execute(cpu_t *cpu, const Decoded_instruction decoded_instr, ram_t *ram)
+uint8_t execute(cpu_t *cpu, const Decoded_instruction decoded_instr, ram_t *ram)
 {
     uint32_t next_pc = cpu->pc + 4;
+    uint8_t ret_val;
     switch (decoded_instr.opcode) {
 
         /* R-type */
         case 0x33:
-            r_type(cpu, decoded_instr);
+            ret_val = r_type(cpu, decoded_instr);
             break;
 
         /* I-type */
@@ -84,36 +85,38 @@ void execute(cpu_t *cpu, const Decoded_instruction decoded_instr, ram_t *ram)
         case 0x13: 
         case 0x67:
         case 0x73: 
-            i_type(cpu, decoded_instr, &next_pc, ram);
+            ret_val = i_type(cpu, decoded_instr, &next_pc, ram);
             break;
 
         /* S-type */
         case 0x23: 
-            s_type(cpu, decoded_instr, ram);
+            ret_val = s_type(cpu, decoded_instr, ram);
             break;
 
         /* U-type */
         case 0x17: 
         case 0x37: 
-            u_type(cpu, decoded_instr);
+            ret_val = u_type(cpu, decoded_instr);
             break;
 
         /* B-type */
         case 0x63:
-            b_type(cpu, decoded_instr, &next_pc);
+            ret_val = b_type(cpu, decoded_instr, &next_pc);
             break;
 
         /* J-type */
         case 0x6F:
-            j_type(cpu, decoded_instr, &next_pc);
+            ret_val = j_type(cpu, decoded_instr, &next_pc);
             break;
 
         default:
-            report_and_abort(INVALID_INSTRUCTION);
+            return INVALID_INSTRUCTION;
     }
 
     cpu->regs[0] = 0; // x0 should always be zero
     cpu->pc = next_pc;
+    
+    return ret_val;
 }
 
 void dump_cpu(cpu_t cpu)

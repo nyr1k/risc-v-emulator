@@ -7,11 +7,11 @@
 #include <memory.h>
 #include <misc.h>
 
-void r_type(cpu_t *cpu, const Decoded_instruction decoded_instr);
-void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_pc, const ram_t *ram);
-void s_type(cpu_t *cpu, const Decoded_instruction decoded_instr, ram_t *ram);
-void u_type(cpu_t *cpu, const Decoded_instruction decoded_instr);
-void b_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_pc);
-void j_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_pc);
+uint8_t r_type(cpu_t *cpu, const Decoded_instruction decoded_instr);
+uint8_t i_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_pc, const ram_t *ram);
+uint8_t s_type(cpu_t *cpu, const Decoded_instruction decoded_instr, ram_t *ram);
+uint8_t u_type(cpu_t *cpu, const Decoded_instruction decoded_instr);
+uint8_t b_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_pc);
+uint8_t j_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_pc);
 
 #endif
