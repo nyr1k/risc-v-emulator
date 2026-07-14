@@ -19,7 +19,5 @@ int main(int argc, char *argv[]) {
   emulator_init(&rv32i, argv[1]);  
   emulator_run(&rv32i);
 
-  dump_cpu(rv32i.cpu);
-
   return 0;
 }
