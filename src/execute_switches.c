@@ -1,52 +1,52 @@
+#include <stdint.h>
+
 #include <misc.h>
 #include <execute_switches.h>
 #include <err.h>
-#include <stdint.h>
-
 
 void r_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
 {
     switch (decoded_instr.funct3) {
 
         case 0x0: 
-            if (decoded_instr.funct7 == 0x00) 
+            if (decoded_instr.funct7 == ADD) 
                 cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] + cpu->regs[decoded_instr.rs2];
-            else if (decoded_instr.funct7 == 0x20)
+            else if (decoded_instr.funct7 == SUB)
                 cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] - cpu->regs[decoded_instr.rs2];
             else
                 report_and_abort(INVALID_INSTRUCTION);
             break;
 
-        case 0x4:
+        case XOR:
             cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] ^ cpu->regs[decoded_instr.rs2];
             break;
 
-        case 0x6:
+        case OR:
             cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] | cpu->regs[decoded_instr.rs2];
             break;
 
-        case 0x7:
+        case AND:
             cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] & cpu->regs[decoded_instr.rs2];
             break;
 
-        case 0x1:
+        case SLL:
             cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] << (cpu->regs[decoded_instr.rs2] & 0x1F); // riscV uses only the lowest 5 bits to shift 
             break;
 
         case 0x5:
-            if (decoded_instr.funct7 == 0x00)
+            if (decoded_instr.funct7 == SRL)
                 cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] >> (cpu->regs[decoded_instr.rs2] & 0x1F); // riscV uses only the lowest 5 bits to shift 
-            else if (decoded_instr.funct7 == 0x20)
+            else if (decoded_instr.funct7 == SRA)
                 cpu->regs[decoded_instr.rd] = shift_right_arith(cpu->regs[decoded_instr.rs1], (cpu->regs[decoded_instr.rs2] & 0x1F)); // riscV uses only the lowest 5 bits to shift 
             else
                 report_and_abort(INVALID_INSTRUCTION);
             break;
 
-        case 0x2:
+        case SLT:
             cpu->regs[decoded_instr.rd] = (int32_t)cpu->regs[decoded_instr.rs1] < (int32_t)cpu->regs[decoded_instr.rs2] ? 1 : 0;
             break;
 
-        case 0x3:
+        case SLTU:
             cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] < cpu->regs[decoded_instr.rs2] ? 1 : 0;
             break;  
 
@@ -63,43 +63,43 @@ void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_
             uint32_t funct7 = (decoded_instr.imm >> 5) & 0x7F;
             switch (decoded_instr.funct3) {
 
-                case 0x0:
+                case ADDI:
                     cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] + decoded_instr.imm;
                     break;
 
-                case 0x4:
+                case XORI:
                     cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] ^ decoded_instr.imm;
                     break;
 
-                case 0x6:
+                case ORI:
                     cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] | decoded_instr.imm;
                     break;
 
-                case 0x7:
+                case ANDI:
                     cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] & decoded_instr.imm;
                     break;
 
                 case 0x1:
-                    if (funct7 == 0x00)
+                    if (funct7 == SLLI)
                         cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] << (decoded_instr.imm & 0x1F);
                     else 
                         report_and_abort(INVALID_INSTRUCTION);
                     break;
 
                 case 0x5:
-                    if (funct7 == 0x00)
+                    if (funct7 == SRLI)
                         cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] >> (decoded_instr.imm & 0x1F);
-                    else if (funct7 == 0x20)
+                    else if (funct7 == SRAI)
                         cpu->regs[decoded_instr.rd] = shift_right_arith(cpu->regs[decoded_instr.rs1], decoded_instr.imm & 0x1F);
                     else
                         report_and_abort(INVALID_INSTRUCTION);
                     break;
 
-                case 0x2:
+                case SLTI:
                     cpu->regs[decoded_instr.rd] = (int32_t)cpu->regs[decoded_instr.rs1] < (int32_t)decoded_instr.imm ? 1 : 0;
                     break;
 
-                case 0x3:
+                case SLTIU:
                     cpu->regs[decoded_instr.rd] = cpu->regs[decoded_instr.rs1] < decoded_instr.imm ? 1 : 0;
                     break;
 
@@ -113,31 +113,31 @@ void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_
             uint32_t target_address = cpu->regs[decoded_instr.rs1] + decoded_instr.imm;
             switch (decoded_instr.funct3) {
                  
-                case 0x0: {
+                case LB: {
                     uint8_t value = read_byte(ram, target_address);
                     cpu->regs[decoded_instr.rd] = sign_extend(value, 8);
                     break;
                 }
-                case 0x1: {
+                case LH: {
                     if (target_address % 2 != 0)
                         report_and_abort(INVALID_LOAD_ALIGNMENT);
                     uint16_t value = read_halfword(ram, target_address);
                     cpu->regs[decoded_instr.rd] = sign_extend(value, 16);
                     break;
                 }
-                case 0x2: {
+                case LW: {
                     if (target_address % 4 != 0)
                         report_and_abort(INVALID_LOAD_ALIGNMENT);
                     uint32_t value = read_word(ram, target_address);
                     cpu->regs[decoded_instr.rd] = value;
                     break;
                 }
-                case 0x4: {
+                case LBU: {
                     uint8_t value = read_byte(ram, target_address);
                     cpu->regs[decoded_instr.rd] = value;
                     break;
                 }
-                case 0x5: {
+                case LHU: {
                     if (target_address % 2 != 0)
                         report_and_abort(INVALID_LOAD_ALIGNMENT);
                     uint16_t value = read_halfword(ram, target_address);
@@ -150,7 +150,7 @@ void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_
             break;
         }
 
-        case 0x67: {
+        case JALR: {
             uint32_t target = (cpu->regs[decoded_instr.rs1] + decoded_instr.imm) & ~1U; // because the immediate is not shifted by 1 bit, we clear the lowest bit manually
             if ((target & 0x3) != 0) // Target address should 4-byte aligned
                 report_and_abort(INVALID_INSTRUCTION_ALIGNMENT);
@@ -169,17 +169,17 @@ void s_type(cpu_t *cpu, const Decoded_instruction decoded_instr, ram_t *ram)
     uint32_t target_address = cpu->regs[decoded_instr.rs1] + decoded_instr.imm;
     switch (decoded_instr.funct3) {
 
-        case 0x0:
+        case SB:
             write_byte(ram, target_address, cpu->regs[decoded_instr.rs2] & 0xFF);
             break;
 
-        case 0x1:
+        case SH:
             if (target_address % 2 != 0)
                 report_and_abort(INVALID_STORE_ALIGNMENT);
             write_halfword(ram, target_address, cpu->regs[decoded_instr.rs2] & 0xFFFF);
             break;
 
-        case 0x2:
+        case SW:
             if (target_address % 4 != 0)
                 report_and_abort(INVALID_STORE_ALIGNMENT);
             write_word(ram, target_address, cpu->regs[decoded_instr.rs2]);
@@ -194,11 +194,11 @@ void u_type(cpu_t *cpu, const Decoded_instruction decoded_instr)
 {
     switch (decoded_instr.opcode) {
     
-        case 0x37:
+        case LUI:
             cpu->regs[decoded_instr.rd] = decoded_instr.imm;
             break;
         
-        case 0x17:
+        case AUIPC:
             cpu->regs[decoded_instr.rd] = cpu->pc + decoded_instr.imm;
             break;
 
@@ -211,32 +211,32 @@ void b_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_
 {
     switch (decoded_instr.funct3) {
         
-        case 0x0:
+        case BEQ:
             if (cpu->regs[decoded_instr.rs1] == cpu->regs[decoded_instr.rs2])
                 *next_pc = cpu->pc + decoded_instr.imm;
             break;
 
-        case 0x1:
+        case BNE:
             if (cpu->regs[decoded_instr.rs1] != cpu->regs[decoded_instr.rs2])
                 *next_pc = cpu->pc + decoded_instr.imm;
             break;
 
-        case 0x4:
+        case BLT:
             if ((int32_t)cpu->regs[decoded_instr.rs1] < (int32_t)cpu->regs[decoded_instr.rs2])
                 *next_pc = cpu->pc + decoded_instr.imm;
             break;
 
-        case 0x5:
+        case BGE:
             if ((int32_t)cpu->regs[decoded_instr.rs1] >= (int32_t)cpu->regs[decoded_instr.rs2])
                 *next_pc = cpu->pc + decoded_instr.imm;
             break;
 
-        case 0x6:
+        case BLTU:
             if (cpu->regs[decoded_instr.rs1] < cpu->regs[decoded_instr.rs2])
                 *next_pc = cpu->pc + decoded_instr.imm;
             break;
 
-        case 0x7:
+        case BGEU:
             if (cpu->regs[decoded_instr.rs1] >= cpu->regs[decoded_instr.rs2])
                 *next_pc = cpu->pc + decoded_instr.imm;
             break;
@@ -249,6 +249,8 @@ void b_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_
         report_and_abort(INVALID_INSTRUCTION_ALIGNMENT);
 }
 
+
+/* jal */
 void j_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_pc)
 {
     cpu->regs[decoded_instr.rd] = *next_pc;
