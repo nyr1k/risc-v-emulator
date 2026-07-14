@@ -1,4 +1,7 @@
+#include "cpu.h"
+#include "memory.h"
 #include <stdint.h>
+#include <stdio.h>
 
 #include <misc.h>
 #include <execute_switches.h>
@@ -159,6 +162,37 @@ void i_type(cpu_t *cpu, const Decoded_instruction decoded_instr, uint32_t *next_
             *next_pc = target;
             break; 
         }
+
+        case 0x73:
+            if (decoded_instr.imm == ECALL)
+                printf("ECALL IS NOT SUPPORTED YET\n");
+            else if (decoded_instr.imm == EBREAK) {
+                printf("\nEBREAK at 0x%08X", cpu->pc);
+                dump_cpu(*cpu);
+
+                // TODO: hex string to hex num
+                // uint32_t choice; 
+                // do {
+                //     printf("\nInspect RAM? (0-1): ");
+                //     scanf("%u", &choice);
+                    
+                //     if (choice == 1) {
+                //         uint32_t address;
+                //         uint32_t words_num;
+
+                //         printf("Address: 0x")
+                //         scanf("%u", &num_w);
+                //         inspect_ram(ram, address, num_w);
+                //     }
+                // } while (choice != 0);
+
+                printf("Press enter to continue program...");
+                getchar(); 
+            }
+            else 
+                report_and_abort(INVALID_INSTRUCTION);
+            break;
+
         default:
             report_and_abort(INVALID_INSTRUCTION);
     } 
