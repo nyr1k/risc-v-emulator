@@ -10,7 +10,7 @@ typedef struct {
 } emulator_t;
 
 void emulator_init(emulator_t *emul, const char *elf_name);
-void emulator_step(emulator_t *emul);
+uint8_t emulator_step(emulator_t *emul);
 void emulator_run(emulator_t *emul);
 
 #endif

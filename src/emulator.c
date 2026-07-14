@@ -66,23 +66,33 @@ void emulator_init(emulator_t *emul, const char *elf_name)
     }
 }   
 
-void emulator_step(emulator_t *emul)
+uint8_t emulator_step(emulator_t *emul)
 {
-    Instruction instr = fetch(&(emul->ram), &(emul->cpu));
-    Decoded_instruction d_instr = decode(instr);
-    execute(&(emul->cpu), d_instr, &(emul->ram));
-
     /* Check if $sp overflowed*/
     if (emul->cpu.regs[SP] < STACK_LIMIT)
-        report_and_abort(SEGFAULT);
+        report_and_abort(STACK_OVERFLOW);
+
+    Instruction instr = fetch(&(emul->ram), &(emul->cpu));
+    Decoded_instruction d_instr = decode(instr);
+    uint8_t ret_val = execute(&(emul->cpu), d_instr, &(emul->ram));
+
+    if (ret_val != 0 && ret_val < 228)
+        report_and_abort(ret_val);
+
+    return ret_val;
 }
 
 void emulator_run(emulator_t *emul)
 {
     uint32_t prev_pc = 0;
     while (1) {
-        emulator_step(emul);
+        uint8_t ret_val = emulator_step(emul);
         
+        if (ret_val == EXIT_PROGRAM) {
+            printf("Program has been finished!\n");
+            break;
+        }
+
         if (emul->cpu.pc == prev_pc) 
             break;
 
