@@ -96,8 +96,12 @@ void report_and_abort(err_code error)
             fprintf(stderr,"%s ELF_CLOSE_FAIL (%d)\n\n", error_sentence, ELF_CLOSE_FAIL);
             abort();
             break;
-        case SEGFAULT:
-            fprintf(stderr,"%s Segmentation fault (%d)\n\n", error_sentence, SEGFAULT);
+        case STACK_OVERFLOW:
+            fprintf(stderr,"%s Stack overflow (%d)\n\n", error_sentence, STACK_OVERFLOW);
+            abort();
+            break;
+        case SYSCALL_NOT_SUPPORTED:
+            fprintf(stderr,"%s SYSCALL_NOT_SUPPORTED (%d)\n\n", error_sentence, SYSCALL_NOT_SUPPORTED);
             abort();
             break;
         default:
