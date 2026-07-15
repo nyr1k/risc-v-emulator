@@ -11,6 +11,10 @@ uint8_t handle_syscall(const cpu_t *cpu)
             return EXIT_PROGRAM;
             break;
 
+        case EXIT2:
+            return EXIT_RET_PROGRAM;
+            break;
+
         default:
             return SYSCALL_NOT_SUPPORTED;
             break;

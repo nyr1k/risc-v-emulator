@@ -1,3 +1,4 @@
+#include "syscall.h"
 #include <stdio.h>
 
 #include <cpu.h>
@@ -89,6 +90,10 @@ void emulator_run(emulator_t *emul)
         
         if (ret_val == EXIT_PROGRAM) {
             printf("Program has been finished!\n");
+            break;
+        } 
+        if (ret_val == EXIT_RET_PROGRAM) {
+            printf("Program has been finished with return value %d\n", emul->cpu.regs[10]);
             break;
         }
     }

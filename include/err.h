@@ -28,7 +28,8 @@ typedef enum : uint8_t {
     STACK_OVERFLOW = 150,
     SYSCALL_NOT_SUPPORTED = 155,
 
-    EXIT_PROGRAM = 228 
+    EXIT_PROGRAM = 228,
+    EXIT_RET_PROGRAM = 229
 } err_code;
 
 void report_and_abort(err_code error);
