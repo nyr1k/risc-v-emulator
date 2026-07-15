@@ -93,9 +93,6 @@ void emulator_run(emulator_t *emul)
             break;
         }
 
-        if (emul->cpu.pc == prev_pc) 
-            break;
-
         prev_pc = emul->cpu.pc;
     }
 }
