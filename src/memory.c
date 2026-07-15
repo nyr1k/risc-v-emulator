@@ -5,6 +5,8 @@
 #include <memory.h>
 #include <err.h>
 
+#include <devices/uart.h>
+
 static inline void check_address(const uint32_t address, const uint32_t size)
 {
     if (address >= BASE_ADDRESS && address < END_ADDRESS && size < END_ADDRESS - address) 
@@ -21,7 +23,7 @@ void memory_init(ram_t *ram)
     printf("[OK] RAM INIT SUCCESS\n");
 }
 
-uint32_t read_word(const ram_t *ram, uint32_t address) 
+uint32_t read_word(const ram_t *ram, const uint32_t address) 
 {
     check_address(address, 4);
     
@@ -37,9 +39,14 @@ uint32_t read_word(const ram_t *ram, uint32_t address)
     return word;
 }
 
-void write_word(ram_t *ram, uint32_t address, uint32_t data) 
+void write_word(ram_t *ram, const uint32_t address, const uint32_t data) 
 {
     check_address(address, 4);
+
+    if (address == UART_ADDRESS) {
+        uart_tx(data & 0xFF);
+        return;
+    }
 
     uint32_t true_address = address - BASE_ADDRESS;
     
@@ -50,7 +57,7 @@ void write_word(ram_t *ram, uint32_t address, uint32_t data)
     ram->memory[true_address+3] = (uint8_t)((data & 0xFF000000) >> 24);
 }
 
-uint16_t read_halfword(const ram_t *ram, uint32_t address)
+uint16_t read_halfword(const ram_t *ram, const uint32_t address)
 {
     check_address(address, 2);
     
@@ -64,10 +71,15 @@ uint16_t read_halfword(const ram_t *ram, uint32_t address)
     return halfword;
 }
 
-void write_halfword(ram_t *ram, uint32_t address, uint16_t data)
+void write_halfword(ram_t *ram, const uint32_t address, const uint16_t data)
 {
     check_address(address, 2);
     
+    if (address == UART_ADDRESS) {
+        uart_tx(data & 0xFF);
+        return;
+    }
+
     uint32_t true_address = address - BASE_ADDRESS;
     
     /* RISC-V uses little-endian mode */
@@ -75,7 +87,7 @@ void write_halfword(ram_t *ram, uint32_t address, uint16_t data)
     ram->memory[true_address+1] = (uint8_t)((data & 0xFF00) >> 8);
 }
 
-uint8_t read_byte(const ram_t *ram, uint32_t address)
+uint8_t read_byte(const ram_t *ram, const uint32_t address)
 {
     check_address(address, 1);
     
@@ -88,9 +100,14 @@ uint8_t read_byte(const ram_t *ram, uint32_t address)
     return byte;
 }
 
-void write_byte(ram_t *ram, uint32_t address, uint8_t data)
+void write_byte(ram_t *ram, const uint32_t address, const uint8_t data)
 {
     check_address(address, 1);
+
+    if (address == UART_ADDRESS) {
+        uart_tx(data);
+        return;
+    }
 
     uint32_t true_address = address - BASE_ADDRESS;
             
