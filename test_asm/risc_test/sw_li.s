@@ -8,6 +8,3 @@ _start:
     sw t1, 0(t0)
 
     lw t2, 0(t0)
-
-halt:
-    j halt

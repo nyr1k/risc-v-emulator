@@ -7,7 +7,8 @@ _start:
   
   ebreak
 
-  li a7, 10
+  li a7, 93
+  li a0, 69
   ecall
 halt:
   j halt
