@@ -49,7 +49,7 @@ void emulator_init(emulator_t *emul, const char *elf_name)
             report_and_abort(NOT_ELF_FILE);
             break; 
         default:
-            printf("[OK] ELF LOAD SUCCESS\n");
+            printf("[OK] ELF LOAD SUCCESS\n\n");
             emul->cpu.pc = (uint32_t) ret_val;
 
             /*
@@ -84,7 +84,6 @@ uint8_t emulator_step(emulator_t *emul)
 
 void emulator_run(emulator_t *emul)
 {
-    uint32_t prev_pc = 0;
     while (1) {
         uint8_t ret_val = emulator_step(emul);
         
@@ -92,7 +91,5 @@ void emulator_run(emulator_t *emul)
             printf("Program has been finished!\n");
             break;
         }
-
-        prev_pc = emul->cpu.pc;
     }
 }
