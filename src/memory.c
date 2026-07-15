@@ -9,7 +9,7 @@
 
 static inline void check_address(const uint32_t address, const uint32_t size)
 {
-    if (address >= BASE_ADDRESS && address < END_ADDRESS && size < END_ADDRESS - address) 
+    if (address >= BASE_ADDRESS && address < END_ADDRESS && size <= END_ADDRESS - address) 
         return ;
     if (address == UART_ADDRESS) 
         return;
