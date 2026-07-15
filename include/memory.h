@@ -7,7 +7,7 @@ enum : uint32_t {
   MEMORY_SIZE  = 1024 * 1024 * 4, // 4 MiB 
   BASE_ADDRESS = 0x80000000,
   END_ADDRESS  = (BASE_ADDRESS + MEMORY_SIZE),
-  MMIO_BASE    = 0x10000000,
+  UART_ADDRESS    = 0x10000000,
   STACK_TOP    = END_ADDRESS,
   STACK_LIMIT  = (STACK_TOP - 0x00001000) // max stack size = 4 KiB
 };
@@ -15,12 +15,6 @@ enum : uint32_t {
 typedef struct {
   uint8_t memory[MEMORY_SIZE]; 
 } ram_t;    
-
-typedef enum : uint8_t {
-  INVALID_ADDRESS,
-  MMIO_ADDRESS,
-  RAM_ADDRESS
-} memory_segment;
 
 void memory_init(ram_t *ram); 
 
