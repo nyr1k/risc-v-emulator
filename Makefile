@@ -10,7 +10,7 @@ HDR = $(wildcard include/*.h)
 OBJ = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRC))
 OBJ += $(BUILD_DIR)/elf_loader.o
 
-.PHONY: all run clean debugger
+.PHONY: all run clean db 
 
 all: $(TARGET_BUILD)
 
