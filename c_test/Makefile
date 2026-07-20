@@ -1,7 +1,7 @@
 .PHONY: all clean
 .SECONDARY: $(OBJS)
 
-CC = riscv32-unknown-elf-gcc
+CC = riscv32-unknown-elf-gcc 
 AS = riscv32-unknown-elf-as
 LD = riscv32-unknown-elf-ld
 
