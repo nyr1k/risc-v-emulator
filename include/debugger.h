@@ -19,11 +19,6 @@ typedef struct {
     uint8_t con_flag;
 } dbg_t; 
 
-/*
-    what do i do with breakpoints now;
-    i will save them in a list  
-*/
-
 void dbg_init(dbg_t* dbg);
 void debugger(dbg_t *dbg, Decoded_instruction d_instr);
 

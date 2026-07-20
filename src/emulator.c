@@ -77,8 +77,6 @@ void emulator_init(emulator_t *emul, const char *elf_name)
 
 uint8_t emulator_step(emulator_t *emul)
 {
-
-
     /* Check if $sp overflowed*/
     if (emul->cpu.regs[SP] < STACK_LIMIT)
         report_and_abort(STACK_OVERFLOW);
