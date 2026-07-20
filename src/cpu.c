@@ -131,7 +131,7 @@ void dump_cpu(cpu_t cpu)
     printf("s4: %08X  s5: %08X  s6:  %08X  s7:  %08X\n", cpu.regs[20], cpu.regs[21], cpu.regs[22], cpu.regs[23]);
     printf("s8: %08X  s9: %08X  s10: %08X  s11: %08X\n", cpu.regs[24], cpu.regs[25], cpu.regs[26], cpu.regs[27]);
     printf("t3: %08X  t4: %08X  t5:  %08X  t6:  %08X\n", cpu.regs[28], cpu.regs[29], cpu.regs[30], cpu.regs[31]);
-    printf("pc:  %08X\n", cpu.pc);
+    printf("pc: %08X\n", cpu.pc);
 
     printf("\n[DEBUG] INSPECT CPU END\n------------------------------------\n");
 

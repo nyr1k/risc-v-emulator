@@ -3,7 +3,10 @@
 
 #include <cpu.h>
 #include <memory.h>
-#include <debugger.h>
+
+#ifdef DEBUG
+    #include <debugger.h>
+#endif
 
 typedef struct {
     cpu_t cpu;
