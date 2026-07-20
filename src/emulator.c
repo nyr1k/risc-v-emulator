@@ -5,7 +5,10 @@
 #include <misc.h>
 #include <emulator.h>
 #include <err.h>
-#include <debugger.h>
+
+#ifdef DEBUG
+    #include <debugger.h>
+#endif
 
 extern int load_elf(uint32_t base_address, uint8_t *memory, const char* elf_name, uint32_t memory_size);
 
@@ -83,17 +86,19 @@ uint8_t emulator_step(emulator_t *emul)
     Instruction instr = fetch(&(emul->ram), &(emul->cpu));
     Decoded_instruction d_instr = decode(instr);
 
-    uint8_t ret_val;
 
 #ifdef DEBUG
-    if (emul->dbg.stp_count) {
-#endif
-        ret_val = execute(&(emul->cpu), d_instr, &(emul->ram));
-#ifdef DEBUG
+    if (is_brk_point(&(emul->dbg), emul->cpu.pc)) {
+        printf("#rv32i: Breakpoint hit at 0x%08X\n", emul->cpu.pc);
+        debugger(&(emul->dbg), d_instr);
+    }
+    else if (emul->dbg.stp_count) 
         emul->dbg.stp_count--;
-    } else 
-        debugger(&(emul->dbg), &(emul->cpu), &(emul->ram), d_instr);
+    else if (!emul->dbg.con_flag)
+        debugger(&(emul->dbg), d_instr);
 #endif
+
+    uint8_t ret_val = execute(&(emul->cpu), d_instr, &(emul->ram));
 
     if (ret_val != 0 && ret_val < 228)
         report_and_abort(ret_val);
