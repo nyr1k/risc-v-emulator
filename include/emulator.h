@@ -3,10 +3,16 @@
 
 #include <cpu.h>
 #include <memory.h>
+#include <debugger.h>
 
 typedef struct {
     cpu_t cpu;
     ram_t ram;
+
+#ifdef DEBUG
+    dbg_t dbg;
+#endif
+
 } emulator_t;
 
 void emulator_init(emulator_t *emul, const char *elf_name);

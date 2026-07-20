@@ -1,4 +1,3 @@
-#include "syscall.h"
 #include <stdio.h>
 
 #include <cpu.h>
@@ -6,6 +5,7 @@
 #include <misc.h>
 #include <emulator.h>
 #include <err.h>
+#include <debugger.h>
 
 extern int load_elf(uint32_t base_address, uint8_t *memory, const char* elf_name, uint32_t memory_size);
 
@@ -13,6 +13,11 @@ void emulator_init(emulator_t *emul, const char *elf_name)
 {
     cpu_init(&(emul->cpu));
     memory_init(&(emul->ram));
+
+#ifdef DEBUG
+    dbg_init(&(emul->dbg));
+#endif
+
     int ret_val = load_elf(BASE_ADDRESS, emul->ram.memory, elf_name, MEMORY_SIZE);
 
     switch (ret_val) {
@@ -69,13 +74,26 @@ void emulator_init(emulator_t *emul, const char *elf_name)
 
 uint8_t emulator_step(emulator_t *emul)
 {
+
+
     /* Check if $sp overflowed*/
     if (emul->cpu.regs[SP] < STACK_LIMIT)
         report_and_abort(STACK_OVERFLOW);
 
     Instruction instr = fetch(&(emul->ram), &(emul->cpu));
     Decoded_instruction d_instr = decode(instr);
-    uint8_t ret_val = execute(&(emul->cpu), d_instr, &(emul->ram));
+
+    uint8_t ret_val;
+
+#ifdef DEBUG
+    if (emul->dbg.stp_count) {
+#endif
+        ret_val = execute(&(emul->cpu), d_instr, &(emul->ram));
+#ifdef DEBUG
+        emul->dbg.stp_count--;
+    } else 
+        debugger(&(emul->dbg), &(emul->cpu), &(emul->ram), d_instr);
+#endif
 
     if (ret_val != 0 && ret_val < 228)
         report_and_abort(ret_val);
@@ -93,7 +111,7 @@ void emulator_run(emulator_t *emul)
             break;
         } 
         if (ret_val == EXIT_RET_PROGRAM) {
-            printf("Program has been finished with return value %d\n", emul->cpu.regs[10]);
+            printf("Program has been finished and returned %d\n", emul->cpu.regs[10]);
             break;
         }
     }
